@@ -51,6 +51,7 @@
             background-repeat: no-repeat;
             background-attachment: fixed;
             color: var(--color-text);
+            height: 100dvh;
         }
 
         #console-wrapper {
@@ -715,6 +716,105 @@
 
         .battle-actions .ui-button { padding-top: .75rem !important; padding-bottom: .75rem !important; }
 
+        @media (max-height: 650px) {
+            body { padding: .5rem !important; }
+            .landscape-console {
+                max-height: calc(100dvh - 1rem);
+                border-radius: 1rem !important;
+            }
+
+            .app-header {
+                min-height: 4.25rem;
+                padding: .45rem 1rem !important;
+            }
+            .app-header h1 { font-size: clamp(1.1rem, 3vw, 1.45rem) !important; white-space: nowrap; }
+            .app-header h1 + span { display: none; }
+            .brand-mark { padding: .35rem !important; }
+            .brand-mark svg { width: 1.25rem !important; height: 1.25rem !important; }
+            .reward-counter { padding: .35rem .7rem !important; }
+            .reward-counter > span { font-size: 1rem !important; }
+            #spring-visual-shelf { max-height: 2.25rem !important; }
+
+            .screen-shell { padding: .5rem !important; gap: .5rem !important; }
+            .ui-panel { border-radius: 1rem !important; }
+
+            .setup-layout { grid-template-columns: minmax(0, .9fr) minmax(19rem, 1.1fr); }
+            .setup-story,
+            .setup-form { padding: .65rem !important; }
+            .setup-description,
+            .setup-help,
+            .setup-form__header p { display: none !important; }
+            .setup-eyebrow { margin-bottom: .1rem; font-size: .68rem; }
+            .setup-title { font-size: 1.35rem; }
+            .setup-form { gap: .4rem !important; }
+            .setup-form__header h2 { font-size: 1.2rem; }
+            .setup-fields { gap: .35rem !important; }
+            .ui-control { min-height: 3rem; padding: .35rem .5rem !important; border-radius: .7rem !important; }
+            .setup-control__label { gap: .3rem; }
+            .setup-control__icon { width: 1.4rem; font-size: 1rem !important; }
+            .setup-control__text { font-size: .82rem !important; }
+            .setup-stepper { grid-template-columns: 2.1rem 3.5rem 2.1rem; gap: .25rem !important; }
+            .setup-stepper .ui-icon-button { width: 2.1rem !important; height: 2.1rem !important; font-size: 1rem !important; }
+            .setup-stepper .setup-value { width: 3.5rem !important; height: 2.1rem; font-size: 1.25rem !important; }
+            .setup-stepper .setup-time-step { font-size: .62rem !important; }
+            #display-time { font-size: 1.15rem !important; }
+            #display-time + span { display: none; }
+            .setup-submit { min-height: 3rem; padding: .45rem !important; font-size: 1.15rem !important; }
+            .setup-hero::before { width: 7rem; height: 7rem; }
+            #setup-knight-img { width: 5.5rem !important; height: 5.5rem !important; }
+            #setup-knight-badge { padding: .2rem .5rem; font-size: .72rem !important; }
+
+            .battle-status {
+                grid-template-columns: 1fr 1fr;
+                min-height: 2.5rem;
+                padding: .35rem .65rem !important;
+                gap: .5rem;
+            }
+            .battle-status__item { font-size: .75rem; }
+            .battle-status__item--center { display: none !important; }
+            .status-value { padding: .15rem .4rem; font-size: .8rem; }
+            .battle-card { grid-template-rows: minmax(0, 1fr) 3rem; }
+            .battle-progress { grid-template-columns: 5.5rem minmax(0, 1fr) 5.5rem; gap: .5rem; padding: .35rem .75rem; }
+            .battle-progress__time small,
+            .battle-progress__solved small { display: none; }
+            .battle-progress__time strong { margin: 0; font-size: 1rem; line-height: 1; }
+            .battle-progress__solved strong { margin: 0; font-size: .85rem; line-height: 1; }
+            .battle-progress__bar { height: .75rem; }
+            .racer img { width: 3rem !important; height: 3rem !important; }
+            .racer__label,
+            .race-goal__label { padding: .1rem .35rem !important; font-size: .58rem !important; }
+            .racer--knight { bottom: 1.15rem !important; }
+            .racer--monster { bottom: 3.6rem !important; }
+            #battle-spring-img { width: 3.5rem !important; height: 3.5rem !important; margin-top: .15rem !important; }
+            .race-scale { bottom: .1rem; height: 1.2rem; }
+            .race-scale__line { top: .45rem; height: .45rem; }
+            .race-scale__label { font-size: .52rem; }
+            .battle-actions { grid-template-columns: minmax(7rem, 1fr) minmax(0, 3fr); min-height: 3.25rem; gap: .5rem !important; }
+            .battle-actions .ui-button { padding: .35rem !important; font-size: 1rem !important; }
+            #btn-attack { font-size: 1.1rem !important; }
+            #btn-attack > span { display: none; }
+
+            .result-card { width: min(40rem, 100%); padding: .65rem !important; gap: .45rem; }
+            .result-summary h2 { font-size: 1.3rem; }
+            .result-summary p { margin-top: .15rem; font-size: .78rem; }
+            .result-content { gap: .5rem; grid-template-columns: minmax(0, 1.2fr) minmax(9rem, .8fr); }
+            .result-visual canvas { width: 5rem !important; height: 5rem !important; }
+            .result-reward { gap: .15rem; padding: .5rem; }
+            .result-reward strong { font-size: 1rem; }
+            .result-actions { min-height: 3rem; gap: .5rem; }
+            .result-actions .ui-button { font-size: .85rem; }
+        }
+
+        @media (max-width: 700px) and (max-height: 650px) {
+            .setup-layout { grid-template-columns: minmax(0, .75fr) minmax(0, 1.25fr); }
+            .setup-story, .setup-form { padding: .5rem !important; }
+            .setup-title { font-size: 1.05rem; }
+            .setup-control__text { font-size: .72rem !important; }
+            #setup-knight-img { width: 5rem !important; height: 5rem !important; }
+            #setup-knight-badge { display: none !important; }
+            .result-content { grid-template-columns: minmax(0, 1fr) minmax(8rem, .75fr); }
+        }
+
         .sr-only {
             position: absolute;
             width: 1px;
@@ -778,7 +878,7 @@
         /* Layout Aspect Ratio */
         .landscape-console {
             aspect-ratio: 16 / 10;
-            max-height: 98vh;
+            max-height: calc(100dvh - 2rem);
         }
         /* Fantasy Scrollbar styled for Forest Theme */
         ::-webkit-scrollbar {
