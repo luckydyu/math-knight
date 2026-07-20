@@ -2,7 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="학습량과 제한 시간을 정하고 물방울 기사와 함께 생명의 샘을 지키는 어린이 수학 학습 게임">
+    <meta name="theme-color" content="#071c18">
     <title>물방울 기사의 수학 숲속 모험!</title>
     <!-- Locally compiled Tailwind CSS: reliable on GitHub Pages and offline. -->
     <link rel="stylesheet" href="./styles.css">
@@ -34,6 +36,13 @@
         }
 
         *, *::before, *::after { box-sizing: border-box; }
+
+        :focus-visible {
+            outline: 3px solid var(--color-gold-500);
+            outline-offset: 3px;
+        }
+
+        .screen-shell:focus { outline: none; }
 
         body, input, button, select, textarea, div, span, p, h1, h2, h3, h4, h5, h6 {
             font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', system-ui, sans-serif !important;
@@ -979,7 +988,7 @@
             <div class="flex items-center space-x-3">
                 <div class="brand-mark p-2 rounded-full text-emerald-950">
                     <!-- Pure Inline SVG Leaf Icon (No Font Dependency) -->
-                    <svg class="w-6 h-6 text-emerald-950" fill="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-6 h-6 text-emerald-950" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path d="M17 8C17 12.97 13.5 16 10 16C9.17 16 8.39 15.84 7.67 15.54C7.88 14.74 8 13.89 8 13C8 8.03 11.5 5 15 5C15.83 5 16.61 5.16 17.33 5.46C17.12 6.26 17 7.11 17 8ZM19.27 3.54C18 3.19 16.5 3 15 3C9.5 3 5 7.5 5 13C5 14.5 5.2 16 5.54 17.27C4.1 18.5 3 20.3 3 22C3 22.5 3.5 23 4 23C5.7 23 7.5 21.9 8.73 20.46C10 20.8 11.5 21 13 21C18.5 21 23 16.5 23 11C23 9.5 22.8 8 22.46 6.73C21.1 5.1 19.3 3.9 19.27 3.54Z"/>
                     </svg>
                 </div>
@@ -991,7 +1000,7 @@
             
             <!-- Hero Dashboard Trophies (Now strictly utilizing fluid visual droplets instead of "cups") -->
             <div class="flex items-center space-x-4">
-                <div class="ui-statusbar reward-counter flex items-center space-x-2 px-5 py-1.5">
+                <div class="ui-statusbar reward-counter flex items-center space-x-2 px-5 py-1.5" role="status" aria-live="polite" aria-atomic="true">
                     <span class="text-2xl text-amber-200">💧 구한 샘물:</span>
                     <div id="spring-visual-shelf" class="flex flex-col space-y-1 items-start min-w-[60px] max-w-[240px] py-1 max-h-[80px] overflow-y-auto">
                         <!-- Drops dynamically injected here with 10-unit line wrap grouping -->
@@ -1002,10 +1011,10 @@
         </header>
 
         <!-- Main Workspace Area -->
-        <main class="flex-1 flex relative z-10 overflow-hidden bg-stone-950/45">
+        <main id="main-content" class="flex-1 flex relative z-10 overflow-hidden bg-stone-950/45">
 
             <!-- ================= SETUP & RESULT COMBINED SCREEN (Landscape Split) ================= -->
-            <section id="screen-setup" class="screen-shell setup-layout w-full h-full transition-all duration-300" aria-labelledby="setup-screen-title">
+            <section id="screen-setup" class="screen-shell setup-layout w-full h-full transition-all duration-300" aria-labelledby="setup-screen-title" tabindex="-1">
                 
                 <!-- Left Column: Story Banner / Live Reward Result Banner (If returning from battle) -->
                 <div class="ui-panel setup-story relative overflow-hidden">
@@ -1057,10 +1066,10 @@
                                 <span class="setup-control__icon">📖</span>
                                 <span class="setup-control__text font-bold">도전할 페이지</span>
                             </div>
-                            <div class="setup-stepper">
-                                <button onclick="changeValue('page', -1)" class="ui-icon-button w-12 h-12 text-3xl">-</button>
+                            <div class="setup-stepper" role="group" aria-label="도전할 페이지 조절">
+                                <button type="button" onclick="changeValue('page', -1)" class="ui-icon-button w-12 h-12 text-3xl" aria-label="도전할 페이지 줄이기">-</button>
                                 <input id="input-page" type="number" value="24" class="setup-value w-20 text-center text-3xl font-bold text-white py-1" aria-label="도전할 페이지" readonly />
-                                <button onclick="changeValue('page', 1)" class="ui-icon-button w-12 h-12 text-3xl">+</button>
+                                <button type="button" onclick="changeValue('page', 1)" class="ui-icon-button w-12 h-12 text-3xl" aria-label="도전할 페이지 늘리기">+</button>
                             </div>
                         </div>
 
@@ -1070,10 +1079,10 @@
                                 <span class="setup-control__icon">✍️</span>
                                 <span class="setup-control__text font-bold">풀어야 할 문제 수</span>
                             </div>
-                            <div class="setup-stepper">
-                                <button onclick="changeValue('questions', -1)" class="ui-icon-button w-12 h-12 text-3xl">-</button>
+                            <div class="setup-stepper" role="group" aria-label="풀어야 할 문제 수 조절">
+                                <button type="button" onclick="changeValue('questions', -1)" class="ui-icon-button w-12 h-12 text-3xl" aria-label="문제 수 줄이기">-</button>
                                 <input id="input-questions" type="number" value="4" class="setup-value w-20 text-center text-3xl font-bold text-white py-1" aria-label="풀어야 할 문제 수" readonly />
-                                <button onclick="changeValue('questions', 1)" class="ui-icon-button w-12 h-12 text-3xl">+</button>
+                                <button type="button" onclick="changeValue('questions', 1)" class="ui-icon-button w-12 h-12 text-3xl" aria-label="문제 수 늘리기">+</button>
                             </div>
                         </div>
 
@@ -1083,29 +1092,29 @@
                                 <span class="setup-control__icon">⏱️</span>
                                 <span class="setup-control__text font-bold">문제당 제한 시간</span>
                             </div>
-                            <div class="setup-stepper">
-                                <button onclick="changeValue('time', -10)" class="ui-icon-button setup-time-step w-16 h-11">-10초</button>
+                            <div class="setup-stepper" role="group" aria-label="문제당 제한 시간 조절">
+                                <button type="button" onclick="changeValue('time', -10)" class="ui-icon-button setup-time-step w-16 h-11" aria-label="제한 시간 10초 줄이기">-10초</button>
                                 <div class="flex flex-col items-center px-2">
                                     <span id="display-time" class="text-3xl font-bold text-white leading-none">3:00</span>
                                     <span class="text-xs text-stone-400 mt-1">(기본 3분)</span>
                                 </div>
-                                <button onclick="changeValue('time', 10)" class="ui-icon-button setup-time-step w-16 h-11">+10초</button>
+                                <button type="button" onclick="changeValue('time', 10)" class="ui-icon-button setup-time-step w-16 h-11" aria-label="제한 시간 10초 늘리기">+10초</button>
                             </div>
                         </div>
 
                     </div>
 
                     <!-- Start Action Button (Dynamic CTA Text based on last play status) -->
-                    <button id="btn-start-adventure" onclick="startAdventure()" class="ui-button ui-button--primary setup-submit w-full text-3xl py-5 flex items-center justify-center space-x-3">
+                    <button id="btn-start-adventure" type="button" onclick="startAdventure()" class="ui-button ui-button--primary setup-submit w-full text-3xl py-5 flex items-center justify-center space-x-3">
                         <span id="start-btn-label">신비로운 모험 시작! (출발)</span>
                     </button>
                 </div>
             </section>
 
             <!-- ================= RESULT SCREEN ================= -->
-            <section id="screen-result" class="screen-shell result-layout hidden w-full h-full transition-all duration-300" aria-labelledby="result-title">
+            <section id="screen-result" class="screen-shell result-layout hidden w-full h-full transition-all duration-300" aria-labelledby="result-title" tabindex="-1">
                 <div id="active-result-banner" class="ui-panel result-card">
-                    <div id="result-alert-box" class="result-summary">
+                    <div id="result-alert-box" class="result-summary" role="status" aria-live="assertive" aria-atomic="true">
                         <span class="setup-eyebrow">모험 결과</span>
                         <h2 id="result-title">결과 메시지</h2>
                         <p id="result-body">결과 상세 설명</p>
@@ -1113,7 +1122,7 @@
 
                     <div class="result-content">
                         <div id="result-visual-frame" class="result-visual">
-                            <canvas id="splash-sprite-canvas" width="128" height="128" class="h-32 w-32 object-contain"></canvas>
+                            <canvas id="splash-sprite-canvas" width="128" height="128" class="h-32 w-32 object-contain" role="img" aria-label="모험 성공을 알리는 물보라 효과"></canvas>
                             <div id="result-splendid-splash-svg" class="hidden"></div>
                         </div>
 
@@ -1136,7 +1145,7 @@
             </section>
 
             <!-- ================= BATTLE SCREEN (Landscape Battle Arena) ================= -->
-            <section id="screen-battle" class="screen-shell battle-layout hidden w-full h-full transition-all duration-300" aria-labelledby="battle-screen-title">
+            <section id="screen-battle" class="screen-shell battle-layout hidden w-full h-full transition-all duration-300" aria-labelledby="battle-screen-title" tabindex="-1">
                 
                 <!-- Battle Status Header -->
                 <div class="ui-statusbar battle-status">
@@ -1145,7 +1154,7 @@
                         <span class="status-value">P. <span id="battle-current-page">24</span></span>
                     </div>
                     <h2 id="battle-screen-title" class="sr-only">생명의 샘 레이스</h2>
-                    <div id="threat-indicator" class="battle-status__item battle-status__item--center">두 영웅이 생명의 샘을 향해 달리고 있어요</div>
+                    <div id="threat-indicator" class="battle-status__item battle-status__item--center" role="status" aria-live="polite">두 영웅이 생명의 샘을 향해 달리고 있어요</div>
                     <div class="battle-status__item battle-status__item--end">
                         <span>🎯 해결 목표</span>
                         <span class="status-value"><span id="battle-total-questions">4</span>문제</span>
@@ -1243,11 +1252,11 @@
                 <!-- Bottom Action Panel ( z-index secured ) -->
                 <div class="battle-actions relative z-30">
                     <!-- Abandon Button -->
-                    <button onclick="abortAdventure()" class="ui-button ui-button--secondary text-2xl flex items-center justify-center space-x-2">
+                    <button type="button" onclick="abortAdventure()" class="ui-button ui-button--secondary text-2xl flex items-center justify-center space-x-2">
                         <span>🏃 포기하고 홈으로</span>
                     </button>
                     <!-- Giant Water Attack Button -->
-                    <button id="btn-attack" onclick="triggerAttack()" class="ui-button ui-button--primary text-3xl flex flex-col items-center justify-center space-y-0.5 relative overflow-hidden">
+                    <button id="btn-attack" type="button" onclick="triggerAttack()" class="ui-button ui-button--primary text-3xl flex flex-col items-center justify-center space-y-0.5 relative overflow-hidden">
                         <div class="flex items-center space-x-3">
                             <span>물방울 검 공격! ⚔️</span>
                         </div>
@@ -1518,10 +1527,12 @@
 
         function showScreen(targetId) {
             const screenIds = ['screen-setup', 'screen-result', 'screen-battle'];
+            let targetScreen = null;
             screenIds.forEach(id => {
                 const screen = document.getElementById(id);
                 if (!screen) return;
                 if (id === targetId) {
+                    targetScreen = screen;
                     screen.classList.remove('hidden', 'screen-enter');
                     // Reflow intentionally restarts the short entrance animation.
                     void screen.offsetWidth;
@@ -1531,6 +1542,9 @@
                     screen.classList.remove('screen-enter');
                 }
             });
+
+            // Keep keyboard and screen-reader context aligned with visual screen changes.
+            requestAnimationFrame(() => targetScreen?.focus({ preventScroll: true }));
         }
 
         function initLeafRain() {
@@ -1684,7 +1698,10 @@
             if (barTimer) {
                 barTimer.style.width = `${percent}%`;
                 const progressBar = barTimer.parentElement;
-                if (progressBar) progressBar.setAttribute('aria-valuenow', Math.round(percent));
+                if (progressBar) {
+                    progressBar.setAttribute('aria-valuenow', Math.round(percent));
+                    progressBar.setAttribute('aria-valuetext', `남은 시간 ${minutes}분 ${seconds}초`);
+                }
             }
 
             // Encroaching Fire Overlay
