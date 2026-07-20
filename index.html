@@ -808,11 +808,13 @@
         .racer__label {
             position: absolute;
             top: 50%;
-            right: calc(100% + .15rem);
+            right: calc(100% - .1rem);
             z-index: 2;
-            max-width: 6.75rem;
+            width: 6.5rem;
             text-align: center;
             white-space: normal;
+            word-break: keep-all;
+            overflow-wrap: normal;
             line-height: 1.15;
             transform: translateY(-50%);
         }
@@ -1053,6 +1055,7 @@
             .racer img { width: 3rem !important; height: 3rem !important; }
             .racer__label,
             .race-goal__label { padding: .1rem .35rem !important; font-size: .58rem !important; }
+            .racer__label { width: 4rem; }
             .racer--knight { bottom: 1.15rem !important; }
             .racer--monster { bottom: 3.6rem !important; }
             #battle-spring-img { width: 3.5rem !important; height: 3.5rem !important; margin-top: .15rem !important; }
@@ -2477,48 +2480,60 @@
             ctx.closePath();
         }
 
-        function drawCertificateBadge(ctx, unit, x, y, size, count) {
+        function loadCertificateImage(src) {
+            return new Promise(resolve => {
+                const image = new Image();
+                image.onload = () => resolve(image);
+                image.onerror = () => resolve(null);
+                image.src = src;
+            });
+        }
+
+        function drawImageCover(ctx, image, x, y, width, height) {
+            const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+            const sourceWidth = width / scale;
+            const sourceHeight = height / scale;
+            const sourceX = (image.naturalWidth - sourceWidth) / 2;
+            const sourceY = (image.naturalHeight - sourceHeight) / 2;
+            ctx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
+        }
+
+        function drawCertificateBadge(ctx, image, unit, x, y, size, count) {
             ctx.save();
             ctx.shadowColor = 'rgba(18,60,49,.28)';
             ctx.shadowBlur = 18;
             ctx.shadowOffsetY = 8;
-            const outer = ctx.createLinearGradient(x, y, x + size, y + size);
-            outer.addColorStop(0, '#ffe58a');
-            outer.addColorStop(.45, '#c99324');
-            outer.addColorStop(1, '#78530e');
-            ctx.fillStyle = outer;
+            ctx.fillStyle = '#c99324';
             ctx.beginPath();
             ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
 
             ctx.save();
-            const inner = ctx.createRadialGradient(x + size * .45, y + size * .35, 8, x + size / 2, y + size / 2, size * .43);
-            inner.addColorStop(0, '#67e8f9');
-            inner.addColorStop(.5, '#0891b2');
-            inner.addColorStop(1, '#064e3b');
-            ctx.fillStyle = inner;
             ctx.beginPath();
-            ctx.arc(x + size / 2, y + size / 2, size * .4, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.arc(x + size / 2, y + size / 2, size / 2 - 2, 0, Math.PI * 2);
+            ctx.clip();
+            if (image) {
+                drawImageCover(ctx, image, x, y, size, size);
+            } else {
+                const fallback = ctx.createRadialGradient(x + size * .45, y + size * .35, 8, x + size / 2, y + size / 2, size * .48);
+                fallback.addColorStop(0, '#67e8f9');
+                fallback.addColorStop(.55, '#0891b2');
+                fallback.addColorStop(1, '#064e3b');
+                ctx.fillStyle = fallback;
+                ctx.fillRect(x, y, size, size);
+                ctx.fillStyle = '#fff7d6';
+                ctx.font = `900 ${unit === 10 ? 66 : 76}px "Malgun Gothic", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(String(unit), x + size / 2, y + size / 2 + 4);
+            }
+            ctx.restore();
 
-            ctx.fillStyle = 'rgba(255,255,255,.86)';
-            ctx.beginPath();
-            ctx.moveTo(x + size / 2, y + 31);
-            ctx.bezierCurveTo(x + 42, y + 72, x + 50, y + 102, x + size / 2, y + 105);
-            ctx.bezierCurveTo(x + size - 50, y + 102, x + size - 42, y + 72, x + size / 2, y + 31);
-            ctx.fill();
-
-            ctx.fillStyle = '#0b2922';
-            drawRoundedRect(ctx, x + 24, y + size - 62, size - 48, 58, 18);
-            ctx.fill();
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `900 ${unit === 10 ? 48 : 54}px "Malgun Gothic", sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.fillText(String(unit), x + size / 2, y + size - 17);
-
+            ctx.save();
             ctx.fillStyle = '#123c31';
             ctx.font = '900 28px "Malgun Gothic", sans-serif';
+            ctx.textAlign = 'center';
             ctx.fillText(`×${count}`, x + size / 2, y + size + 34);
             ctx.restore();
         }
@@ -2534,12 +2549,29 @@
                 year: 'numeric', month: 'long', day: 'numeric',
                 hour: '2-digit', minute: '2-digit', second: '2-digit'
             }).format(now);
+            const canUseCanvasAssets = location.protocol !== 'file:';
+            const [backgroundImage, badge1Image, badge10Image] = canUseCanvasAssets
+                ? await Promise.all([
+                    loadCertificateImage(BUNDLED_ASSETS.bg),
+                    loadCertificateImage(BUNDLED_ASSETS.springBadge1),
+                    loadCertificateImage(BUNDLED_ASSETS.springBadge10)
+                ])
+                : [null, null, null];
+
             const background = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            background.addColorStop(0, '#fbf4df');
-            background.addColorStop(.55, '#f4e7c3');
-            background.addColorStop(1, '#e8d29a');
+            background.addColorStop(0, '#123c31');
+            background.addColorStop(.55, '#0b2922');
+            background.addColorStop(1, '#071c18');
             ctx.fillStyle = background;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            if (backgroundImage) {
+                ctx.save();
+                ctx.filter = 'blur(14px) brightness(.62) saturate(.82)';
+                drawImageCover(ctx, backgroundImage, -28, -28, canvas.width + 56, canvas.height + 56);
+                ctx.restore();
+                ctx.fillStyle = 'rgba(3, 35, 29, .34)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
 
             ctx.strokeStyle = '#123c31';
             ctx.lineWidth = 18;
@@ -2548,7 +2580,7 @@
             ctx.lineWidth = 5;
             ctx.strokeRect(53, 53, canvas.width - 106, canvas.height - 106);
 
-            ctx.fillStyle = 'rgba(18,60,49,.06)';
+            ctx.fillStyle = 'rgba(246,196,83,.11)';
             for (let x = 90; x < canvas.width; x += 120) {
                 ctx.beginPath();
                 ctx.arc(x, 690, 34, 0, Math.PI * 2);
@@ -2556,14 +2588,17 @@
             }
 
             ctx.textAlign = 'center';
-            ctx.fillStyle = '#0b2922';
+            ctx.fillStyle = '#fff4c7';
             ctx.font = '800 48px "Malgun Gothic", sans-serif';
+            ctx.shadowColor = 'rgba(0,0,0,.48)';
+            ctx.shadowBlur = 10;
             ctx.fillText('물방울 기사의 수학 모험 인증서', 600, 132);
-            ctx.fillStyle = '#81611f';
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#bae6e2';
             ctx.font = '700 21px "Malgun Gothic", sans-serif';
             ctx.fillText('생명의 샘을 지킨 오늘의 학습 기록', 600, 174);
 
-            ctx.fillStyle = '#ffffffaa';
+            ctx.fillStyle = 'rgba(255,250,235,.91)';
             drawRoundedRect(ctx, 105, 210, 990, 410, 32);
             ctx.fill();
             ctx.strokeStyle = 'rgba(18,60,49,.22)';
@@ -2595,8 +2630,8 @@
             const tens = Math.floor(state.springCount / 10);
             const ones = state.springCount % 10;
             const groups = [];
-            if (tens > 0) groups.push({ unit: 10, count: tens });
-            if (ones > 0) groups.push({ unit: 1, count: ones });
+            if (tens > 0) groups.push({ unit: 10, count: tens, image: badge10Image });
+            if (ones > 0) groups.push({ unit: 1, count: ones, image: badge1Image });
 
             if (groups.length === 0) {
                 ctx.textAlign = 'center';
@@ -2609,15 +2644,15 @@
                 const totalWidth = groups.length * badgeSize + (groups.length - 1) * gap;
                 const startX = 865 - totalWidth / 2;
                 groups.forEach((group, index) => {
-                    drawCertificateBadge(ctx, group.unit, startX + index * (badgeSize + gap), 315, badgeSize, group.count);
+                    drawCertificateBadge(ctx, group.image, group.unit, startX + index * (badgeSize + gap), 315, badgeSize, group.count);
                 });
             }
 
             ctx.textAlign = 'center';
-            ctx.fillStyle = '#123c31';
+            ctx.fillStyle = '#ecfeff';
             ctx.font = '800 24px "Malgun Gothic", sans-serif';
             ctx.fillText('오늘도 한 페이지씩, 생명의 샘에 더 가까워졌습니다.', 600, 682);
-            ctx.fillStyle = '#81611f';
+            ctx.fillStyle = '#f6d675';
             ctx.font = '700 18px "Malgun Gothic", sans-serif';
             ctx.fillText('물방울 기사와 함께한 숲속 수학 Adventure', 600, 724);
         }
