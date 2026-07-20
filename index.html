@@ -154,6 +154,96 @@
             opacity: 1;
         }
 
+        .progress-certificate {
+            padding: .15rem .45rem;
+            border: 1px solid rgba(103,232,249,.32);
+            border-radius: .45rem;
+            background: rgba(8,51,68,.42);
+            color: var(--color-water-400);
+            font-size: .65rem;
+            font-weight: 800;
+        }
+
+        .progress-certificate:hover,
+        .progress-certificate:focus-visible { background: rgba(14,116,144,.42); }
+
+        .certificate-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: grid;
+            place-items: center;
+            padding: 1rem;
+            background: rgba(2,12,10,.86);
+            backdrop-filter: blur(8px);
+        }
+
+        .certificate-modal.hidden { display: none; }
+
+        .certificate-dialog {
+            display: grid;
+            gap: .75rem;
+            width: min(56rem, 96vw);
+            max-height: 94dvh;
+            padding: 1rem;
+            overflow-y: auto;
+            border: 1px solid rgba(246,196,83,.48);
+            border-radius: 1.25rem;
+            background: linear-gradient(155deg, rgba(11,41,34,.99), rgba(7,28,24,.99));
+            box-shadow: 0 24px 70px rgba(0,0,0,.55);
+        }
+
+        .certificate-dialog__header,
+        .certificate-dialog__actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+        }
+
+        .certificate-dialog__header h2 {
+            color: var(--color-gold-500);
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+
+        .certificate-close {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            color: var(--color-text-muted);
+            font-size: 1.4rem;
+        }
+
+        .certificate-preview {
+            display: block;
+            width: 100%;
+            height: auto;
+            border: 1px solid var(--color-line);
+            border-radius: .9rem;
+            background: #f5ecd2;
+        }
+
+        .certificate-dialog__actions { justify-content: flex-end; }
+
+        .certificate-action {
+            min-height: 2.75rem;
+            padding: .55rem 1rem;
+            border-radius: .7rem;
+            font-weight: 800;
+        }
+
+        .certificate-action--secondary {
+            border: 1px solid var(--color-line);
+            color: var(--color-text-muted);
+        }
+
+        .certificate-action--primary {
+            border: 1px solid rgba(103,232,249,.5);
+            background: linear-gradient(135deg, #0891b2, #0f766e);
+            color: white;
+        }
+
         .screen-shell {
             padding: var(--space-3) !important;
             gap: var(--space-3) !important;
@@ -718,8 +808,12 @@
         .racer__label {
             position: absolute;
             top: 50%;
-            right: calc(100% + .5rem);
+            right: calc(100% + .15rem);
             z-index: 2;
+            max-width: 6.75rem;
+            text-align: center;
+            white-space: normal;
+            line-height: 1.15;
             transform: translateY(-50%);
         }
 
@@ -905,8 +999,9 @@
             .reward-counter > span { font-size: 1rem !important; }
             .header-summary { min-width: 14rem; gap: .2rem; }
             .reward-badge-image { width: 2rem; height: 2rem; }
-            .today-completed { padding: .15rem .5rem; font-size: .65rem; }
+            .today-completed { gap: .3rem; padding: .15rem .5rem; font-size: .65rem; }
             .progress-reset { padding: .1rem .3rem; font-size: .55rem; }
+            .progress-certificate { padding: .1rem .3rem; font-size: .55rem; }
 
             .screen-shell { padding: .5rem !important; gap: .5rem !important; }
             .ui-panel { border-radius: 1rem !important; }
@@ -1195,6 +1290,7 @@
                 <div class="today-completed">
                     <span>오늘 완료한 페이지</span>
                     <strong id="today-completed-pages" role="status" aria-live="polite" aria-atomic="true">아직 없음</strong>
+                    <button id="btn-open-certificate" type="button" class="progress-certificate" onclick="openCertificateModal()" aria-haspopup="dialog">인증서</button>
                     <button type="button" class="progress-reset" onclick="resetProgress()" aria-label="구한 샘물과 완료 페이지 진행 상황 초기화">초기화</button>
                 </div>
             </div>
@@ -1458,6 +1554,20 @@
 
         </main>
 
+    </div>
+
+    <div id="certificate-modal" class="certificate-modal hidden" role="dialog" aria-modal="true" aria-labelledby="certificate-modal-title" onclick="handleCertificateBackdrop(event)">
+        <div class="certificate-dialog" tabindex="-1">
+            <div class="certificate-dialog__header">
+                <h2 id="certificate-modal-title">수학 모험 인증서</h2>
+                <button type="button" class="certificate-close" onclick="closeCertificateModal()" aria-label="인증서 닫기">×</button>
+            </div>
+            <canvas id="progress-certificate-canvas" class="certificate-preview" width="1200" height="800" role="img" aria-label="구한 샘물과 오늘 완료한 페이지 인증서 미리보기"></canvas>
+            <div class="certificate-dialog__actions">
+                <button type="button" class="certificate-action certificate-action--secondary" onclick="closeCertificateModal()">닫기</button>
+                <button id="btn-download-certificate" type="button" class="certificate-action certificate-action--primary" onclick="downloadCertificate()">PNG 이미지 저장</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -2328,19 +2438,20 @@
             });
         }
 
-        function updateTodayCompletedPages() {
+        function getCompletedPageRangeText() {
             ensureTodayCompletionState();
-            const display = document.getElementById('today-completed-pages');
-            if (!display) return;
-
             if (state.completedPages.length === 0) {
-                display.textContent = '아직 없음';
-                return;
+                return '아직 없음';
             }
 
             const first = state.completedPages[0];
             const last = state.completedPages[state.completedPages.length - 1];
-            display.textContent = first === last ? `P. ${first}` : `P. ${first}–${last}`;
+            return first === last ? `P. ${first}` : `P. ${first}–${last}`;
+        }
+
+        function updateTodayCompletedPages() {
+            const display = document.getElementById('today-completed-pages');
+            if (display) display.textContent = getCompletedPageRangeText();
         }
 
         function updateDashboardUI() {
@@ -2351,6 +2462,217 @@
         function updateResultSpringShowcase() {
             renderSpringBadges(document.getElementById('result-spring-visual-shelf'), state.springCount);
         }
+
+        let certificateGeneratedAt = null;
+        let certificateLastFocused = null;
+
+        function drawRoundedRect(ctx, x, y, width, height, radius) {
+            const r = Math.min(radius, width / 2, height / 2);
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + width, y, x + width, y + height, r);
+            ctx.arcTo(x + width, y + height, x, y + height, r);
+            ctx.arcTo(x, y + height, x, y, r);
+            ctx.arcTo(x, y, x + width, y, r);
+            ctx.closePath();
+        }
+
+        function drawCertificateBadge(ctx, unit, x, y, size, count) {
+            ctx.save();
+            ctx.shadowColor = 'rgba(18,60,49,.28)';
+            ctx.shadowBlur = 18;
+            ctx.shadowOffsetY = 8;
+            const outer = ctx.createLinearGradient(x, y, x + size, y + size);
+            outer.addColorStop(0, '#ffe58a');
+            outer.addColorStop(.45, '#c99324');
+            outer.addColorStop(1, '#78530e');
+            ctx.fillStyle = outer;
+            ctx.beginPath();
+            ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            ctx.save();
+            const inner = ctx.createRadialGradient(x + size * .45, y + size * .35, 8, x + size / 2, y + size / 2, size * .43);
+            inner.addColorStop(0, '#67e8f9');
+            inner.addColorStop(.5, '#0891b2');
+            inner.addColorStop(1, '#064e3b');
+            ctx.fillStyle = inner;
+            ctx.beginPath();
+            ctx.arc(x + size / 2, y + size / 2, size * .4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(255,255,255,.86)';
+            ctx.beginPath();
+            ctx.moveTo(x + size / 2, y + 31);
+            ctx.bezierCurveTo(x + 42, y + 72, x + 50, y + 102, x + size / 2, y + 105);
+            ctx.bezierCurveTo(x + size - 50, y + 102, x + size - 42, y + 72, x + size / 2, y + 31);
+            ctx.fill();
+
+            ctx.fillStyle = '#0b2922';
+            drawRoundedRect(ctx, x + 24, y + size - 62, size - 48, 58, 18);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `900 ${unit === 10 ? 48 : 54}px "Malgun Gothic", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText(String(unit), x + size / 2, y + size - 17);
+
+            ctx.fillStyle = '#123c31';
+            ctx.font = '900 28px "Malgun Gothic", sans-serif';
+            ctx.fillText(`×${count}`, x + size / 2, y + size + 34);
+            ctx.restore();
+        }
+
+        async function renderCertificate() {
+            ensureTodayCompletionState();
+            const canvas = document.getElementById('progress-certificate-canvas');
+            const ctx = canvas?.getContext('2d');
+            if (!canvas || !ctx) return;
+
+            const now = certificateGeneratedAt || new Date();
+            const dateTime = new Intl.DateTimeFormat('ko-KR', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            }).format(now);
+            const background = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            background.addColorStop(0, '#fbf4df');
+            background.addColorStop(.55, '#f4e7c3');
+            background.addColorStop(1, '#e8d29a');
+            ctx.fillStyle = background;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = '#123c31';
+            ctx.lineWidth = 18;
+            ctx.strokeRect(32, 32, canvas.width - 64, canvas.height - 64);
+            ctx.strokeStyle = '#c3932f';
+            ctx.lineWidth = 5;
+            ctx.strokeRect(53, 53, canvas.width - 106, canvas.height - 106);
+
+            ctx.fillStyle = 'rgba(18,60,49,.06)';
+            for (let x = 90; x < canvas.width; x += 120) {
+                ctx.beginPath();
+                ctx.arc(x, 690, 34, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#0b2922';
+            ctx.font = '800 48px "Malgun Gothic", sans-serif';
+            ctx.fillText('물방울 기사의 수학 모험 인증서', 600, 132);
+            ctx.fillStyle = '#81611f';
+            ctx.font = '700 21px "Malgun Gothic", sans-serif';
+            ctx.fillText('생명의 샘을 지킨 오늘의 학습 기록', 600, 174);
+
+            ctx.fillStyle = '#ffffffaa';
+            drawRoundedRect(ctx, 105, 210, 990, 410, 32);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(18,60,49,.22)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#567168';
+            ctx.font = '700 20px "Malgun Gothic", sans-serif';
+            ctx.fillText('인증 일시', 160, 275);
+            ctx.fillStyle = '#123c31';
+            ctx.font = '800 27px "Malgun Gothic", sans-serif';
+            ctx.fillText(dateTime, 160, 314);
+
+            ctx.fillStyle = '#567168';
+            ctx.font = '700 20px "Malgun Gothic", sans-serif';
+            ctx.fillText('오늘 완료한 페이지', 160, 382);
+            ctx.fillStyle = '#0f766e';
+            ctx.font = '900 46px "Malgun Gothic", sans-serif';
+            ctx.fillText(getCompletedPageRangeText(), 160, 438);
+
+            ctx.fillStyle = '#567168';
+            ctx.font = '700 20px "Malgun Gothic", sans-serif';
+            ctx.fillText('구한 생명의 샘물', 160, 506);
+            ctx.fillStyle = '#b7791f';
+            ctx.font = '900 62px "Malgun Gothic", sans-serif';
+            ctx.fillText(`총 ${state.springCount}개`, 160, 574);
+
+            const tens = Math.floor(state.springCount / 10);
+            const ones = state.springCount % 10;
+            const groups = [];
+            if (tens > 0) groups.push({ unit: 10, count: tens });
+            if (ones > 0) groups.push({ unit: 1, count: ones });
+
+            if (groups.length === 0) {
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#789188';
+                ctx.font = '800 28px "Malgun Gothic", sans-serif';
+                ctx.fillText('첫 번째 샘물을 기다리고 있어요', 865, 430);
+            } else {
+                const badgeSize = 170;
+                const gap = 34;
+                const totalWidth = groups.length * badgeSize + (groups.length - 1) * gap;
+                const startX = 865 - totalWidth / 2;
+                groups.forEach((group, index) => {
+                    drawCertificateBadge(ctx, group.unit, startX + index * (badgeSize + gap), 315, badgeSize, group.count);
+                });
+            }
+
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#123c31';
+            ctx.font = '800 24px "Malgun Gothic", sans-serif';
+            ctx.fillText('오늘도 한 페이지씩, 생명의 샘에 더 가까워졌습니다.', 600, 682);
+            ctx.fillStyle = '#81611f';
+            ctx.font = '700 18px "Malgun Gothic", sans-serif';
+            ctx.fillText('물방울 기사와 함께한 숲속 수학 Adventure', 600, 724);
+        }
+
+        async function openCertificateModal() {
+            soundClick();
+            certificateLastFocused = document.activeElement;
+            certificateGeneratedAt = new Date();
+            const modal = document.getElementById('certificate-modal');
+            const downloadButton = document.getElementById('btn-download-certificate');
+            modal?.classList.remove('hidden');
+            if (downloadButton) downloadButton.disabled = true;
+            await renderCertificate();
+            if (downloadButton) downloadButton.disabled = false;
+            modal?.querySelector('.certificate-dialog')?.focus({ preventScroll: true });
+        }
+
+        function closeCertificateModal() {
+            document.getElementById('certificate-modal')?.classList.add('hidden');
+            certificateLastFocused?.focus?.({ preventScroll: true });
+        }
+
+        function handleCertificateBackdrop(event) {
+            if (event.target.id === 'certificate-modal') closeCertificateModal();
+        }
+
+        async function downloadCertificate() {
+            const canvas = document.getElementById('progress-certificate-canvas');
+            if (!canvas) return;
+            if (!certificateGeneratedAt) {
+                certificateGeneratedAt = new Date();
+                await renderCertificate();
+            }
+
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            if (!blob) return;
+            const timestamp = certificateGeneratedAt;
+            const date = `${timestamp.getFullYear()}-${String(timestamp.getMonth() + 1).padStart(2, '0')}-${String(timestamp.getDate()).padStart(2, '0')}`;
+            const time = `${String(timestamp.getHours()).padStart(2, '0')}${String(timestamp.getMinutes()).padStart(2, '0')}`;
+            const link = document.createElement('a');
+            const objectUrl = URL.createObjectURL(blob);
+            link.href = objectUrl;
+            link.download = `물방울-기사-수학-인증서-${date}-${time}.png`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+        }
+
+        document.addEventListener('keydown', event => {
+            const modal = document.getElementById('certificate-modal');
+            if (event.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+                closeCertificateModal();
+            }
+        });
 
         // Window Initializer
         window.onload = function () {
