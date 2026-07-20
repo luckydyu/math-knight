@@ -863,6 +863,23 @@
             70% { transform: scale(1.3); }
             100% { transform: scale(1) translateY(0); opacity: 1; }
         }
+        @keyframes screen-enter {
+            0% { opacity: 0; transform: translateY(8px) scale(.992); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes panel-reveal {
+            0% { opacity: 0; transform: translateY(12px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes goal-glow {
+            0%, 100% { filter: drop-shadow(0 0 4px rgba(34,211,238,.25)); }
+            50% { filter: drop-shadow(0 0 14px rgba(34,211,238,.7)); }
+        }
+        @keyframes result-glow {
+            0% { box-shadow: inset 0 0 0 rgba(34,211,238,0); }
+            55% { box-shadow: inset 0 0 36px rgba(34,211,238,.16); }
+            100% { box-shadow: inset 0 0 0 rgba(34,211,238,0); }
+        }
         .animate-float {
             animation: float 2.5s ease-in-out infinite;
         }
@@ -875,6 +892,17 @@
         .animate-spring-pop {
             animation: spring-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
+        .screen-enter { animation: screen-enter .32s cubic-bezier(.22, 1, .36, 1) both; }
+        .screen-enter > .ui-panel,
+        .screen-enter > .battle-status,
+        .screen-enter > .battle-card,
+        .screen-enter > .battle-actions {
+            animation: panel-reveal .38s cubic-bezier(.22, 1, .36, 1) both;
+        }
+        .screen-enter > :nth-child(2) { animation-delay: .04s; }
+        .screen-enter > :nth-child(3) { animation-delay: .08s; }
+        .race-goal { animation: goal-glow 2.4s ease-in-out infinite; }
+        .result-card.is-victory .result-visual { animation: result-glow 1.1s ease-out both; }
         /* Layout Aspect Ratio */
         .landscape-console {
             aspect-ratio: 16 / 10;
@@ -940,6 +968,17 @@
         }
         .slash-wave.active {
             animation: slash-sweep 0.6s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: .01ms !important;
+                animation-delay: 0ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: .01ms !important;
+            }
+            .ui-button--primary::after { display: none; }
         }
     </style>
 </head>
@@ -1804,10 +1843,32 @@
             }
         }
 
+        function prefersReducedMotion() {
+            return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+        }
+
+        function showScreen(targetId) {
+            const screenIds = ['screen-setup', 'screen-result', 'screen-battle'];
+            screenIds.forEach(id => {
+                const screen = document.getElementById(id);
+                if (!screen) return;
+                if (id === targetId) {
+                    screen.classList.remove('hidden', 'screen-enter');
+                    // Reflow intentionally restarts the short entrance animation.
+                    void screen.offsetWidth;
+                    screen.classList.add('screen-enter');
+                } else {
+                    screen.classList.add('hidden');
+                    screen.classList.remove('screen-enter');
+                }
+            });
+        }
+
         function initLeafRain() {
             const container = document.getElementById('leaf-container');
             if (!container) return;
             container.innerHTML = '';
+            if (prefersReducedMotion()) return;
             for (let i = 0; i < 15; i++) {
                 createLeaf(container);
             }
@@ -1855,13 +1916,7 @@
             updateKnightVisuals();
 
             // Screen shift
-            const setupScreen = document.getElementById('screen-setup');
-            const battleScreen = document.getElementById('screen-battle');
-            const resultScreen = document.getElementById('screen-result');
-            
-            if (setupScreen) setupScreen.classList.add('hidden');
-            if (resultScreen) resultScreen.classList.add('hidden');
-            if (battleScreen) battleScreen.classList.remove('hidden');
+            showScreen('screen-battle');
 
             appLog(`전투 개시! P. ${state.currentPage} - 총 ${state.questionsCount}문제, 제한시간 ${state.totalTimer}초`, "info");
             updateTimerAndMovement();
@@ -1994,6 +2049,9 @@
         }
 
         async function triggerAttack() {
+            const attackBtn = document.getElementById('btn-attack');
+            if (attackBtn?.disabled) return;
+            if (attackBtn) attackBtn.disabled = true;
             soundSwordSlash();
             
             if (state.timerInterval) {
@@ -2006,6 +2064,9 @@
             const monsterContainer = document.getElementById('monster-container');
             const impactSlash = document.getElementById('impact-slash');
             const impactFlash = document.getElementById('impact-flash');
+            const reducedMotion = prefersReducedMotion();
+            const impactDelay = reducedMotion ? 0 : 200;
+            const finishDelay = reducedMotion ? 120 : 600;
 
             // CRITICAL UPGRADE: 물방울 기사 돌진 & 몬스터 직접 베기 애니메이션 구현
             if (knightWrapper && monsterWrapper) {
@@ -2047,9 +2108,9 @@
                     // 4. 돌진 후 기사 원위치 복귀 (0.3s)
                     setTimeout(() => {
                         knightWrapper.style.left = originalLeft;
-                    }, 150);
+                    }, reducedMotion ? 0 : 150);
 
-                }, 200);
+                }, impactDelay);
             }
 
             appLog("물방울 검 돌진 참격이 가동되었습니다!", "info");
@@ -2062,7 +2123,7 @@
                     knightWrapper.style.transition = 'all 1s ease-in-out'; // 원래 트랜지션 복귀
                 }
                 finishAdventure(true);
-            }, 600);
+            }, finishDelay);
         }
 
         // Pure Canvas 4x4 Sprite Sheet Sequential Keyframe Player
@@ -2093,6 +2154,20 @@
                 // Use floor rounding on crop frames to avoid bleed/shift wraps
                 const frameWidth = Math.floor(img.naturalWidth / cols);
                 const frameHeight = Math.floor(img.naturalHeight / rows);
+
+                if (prefersReducedMotion()) {
+                    const stillFrame = 7;
+                    const stillColumn = stillFrame % cols;
+                    const stillRow = Math.floor(stillFrame / cols);
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(
+                        img,
+                        stillColumn * frameWidth, stillRow * frameHeight, frameWidth, frameHeight,
+                        0, 0, canvas.width, canvas.height
+                    );
+                    spriteAnimationId = null;
+                    return;
+                }
 
                 let currentFrame = 0;
                 let lastTick = 0;
@@ -2142,13 +2217,7 @@
             if (attackBtn) attackBtn.disabled = true;
 
             // Transition to the dedicated result screen.
-            const battleScr = document.getElementById('screen-battle');
-            const setupScr = document.getElementById('screen-setup');
-            const resultScr = document.getElementById('screen-result');
-            
-            if (battleScr) battleScr.classList.add('hidden');
-            if (setupScr) setupScr.classList.add('hidden');
-            if (resultScr) resultScr.classList.remove('hidden');
+            showScreen('screen-result');
 
             const resultPanel = document.getElementById('active-result-banner');
             const resultTitle = document.getElementById('result-title');
@@ -2253,23 +2322,12 @@
 
             appLog("모험을 포기하고 대기 상태로 전환했습니다.", "info");
             
-            const battleScr = document.getElementById('screen-battle');
-            const setupScr = document.getElementById('screen-setup');
-            const resultScr = document.getElementById('screen-result');
-            
-            if (battleScr) battleScr.classList.add('hidden');
-            if (resultScr) resultScr.classList.add('hidden');
-            if (setupScr) setupScr.classList.remove('hidden');
+            showScreen('screen-setup');
         }
 
         function returnToSetup() {
             soundClick();
-            const resultScr = document.getElementById('screen-result');
-            const battleScr = document.getElementById('screen-battle');
-            const setupScr = document.getElementById('screen-setup');
-            if (resultScr) resultScr.classList.add('hidden');
-            if (battleScr) battleScr.classList.add('hidden');
-            if (setupScr) setupScr.classList.remove('hidden');
+            showScreen('screen-setup');
         }
 
         // Custom 10-Unit Row Break Visualizer
