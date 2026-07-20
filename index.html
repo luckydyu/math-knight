@@ -12,6 +12,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            /* 1단계 디자인 시스템: 8px spacing, restrained forest/water palette */
+            --color-forest-950: #071c18;
+            --color-forest-900: #0b2922;
+            --color-forest-800: #123c31;
+            --color-water-500: #22d3ee;
+            --color-water-400: #67e8f9;
+            --color-gold-500: #f6c453;
+            --color-fire-500: #f97316;
+            --color-text: #f8fafc;
+            --color-text-muted: #b8c8c3;
+            --color-line: rgba(148, 210, 190, .22);
+            --surface-strong: rgba(7, 28, 24, .94);
+            --surface-panel: rgba(11, 41, 34, .88);
+            --surface-soft: rgba(18, 60, 49, .7);
+            --space-1: .5rem;
+            --space-2: 1rem;
+            --space-3: 1.5rem;
+            --space-4: 2rem;
+            --radius-sm: .75rem;
+            --radius-md: 1rem;
+            --radius-lg: 1.5rem;
+            --shadow-panel: 0 16px 40px rgba(0, 0, 0, .3);
+            --shadow-action: 0 8px 20px rgba(6, 182, 212, .2);
+            --border-sheet-url: none;
+            --button-sheet-url: none;
+            --main-bg-url: none;
+        }
+
         body, input, button, select, textarea, div, span, p, h1, h2, h3, h4, h5, h6 {
             font-family: 'Gaegu', cursive, sans-serif !important;
             user-select: none;
@@ -20,10 +49,100 @@
         }
         body {
             background-color: #022c22; /* Deep forest green */
-            background-image: radial-gradient(circle at center, #065f46 0%, #022c22 100%);
+            background-image: linear-gradient(rgba(2, 44, 34, 0.28), rgba(2, 44, 34, 0.5)), url('./bg.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: var(--color-text);
+        }
+
+        #console-wrapper {
+            background: var(--surface-strong);
+            border: 1px solid rgba(103, 232, 249, .28) !important;
+            border-radius: var(--radius-lg) !important;
+            box-shadow: var(--shadow-panel) !important;
+            backdrop-filter: blur(8px);
+        }
+
+        .app-header {
+            min-height: 5.5rem;
+            padding: var(--space-2) var(--space-3) !important;
+            background: linear-gradient(90deg, rgba(7,28,24,.98), rgba(18,60,49,.96)) !important;
+            border-bottom: 1px solid var(--color-line) !important;
+        }
+
+        .screen-shell {
+            padding: var(--space-3) !important;
+            gap: var(--space-3) !important;
+        }
+
+        .ui-panel {
+            background: var(--surface-panel) !important;
+            border: 1px solid var(--color-line) !important;
+            border-radius: var(--radius-lg) !important;
+            box-shadow: 0 10px 28px rgba(0,0,0,.2) !important;
+        }
+
+        .ui-control {
+            min-height: 5rem;
+            padding: var(--space-2) !important;
+            background: var(--surface-soft) !important;
+            border: 1px solid var(--color-line) !important;
+            border-radius: var(--radius-md) !important;
+            box-shadow: none !important;
+        }
+
+        .ui-button,
+        .ui-icon-button {
+            border: 1px solid rgba(103,232,249,.25) !important;
+            border-radius: var(--radius-sm) !important;
+            font-weight: 700;
+            transition: transform .16s ease, filter .16s ease, box-shadow .16s ease !important;
+        }
+
+        .ui-button:hover, .ui-icon-button:hover { filter: brightness(1.1); }
+        .ui-button:active, .ui-icon-button:active { transform: translateY(1px) scale(.98); }
+        .ui-button:focus-visible, .ui-icon-button:focus-visible, input:focus-visible {
+            outline: 3px solid var(--color-gold-500);
+            outline-offset: 3px;
+        }
+
+        .ui-icon-button {
+            background: var(--color-forest-800) !important;
+            color: var(--color-gold-500) !important;
+            box-shadow: none !important;
+        }
+
+        .ui-button--primary {
+            background: linear-gradient(135deg, #0891b2, #0f766e) !important;
+            color: white !important;
+            border-color: rgba(103,232,249,.45) !important;
+            box-shadow: var(--shadow-action) !important;
+        }
+
+        .ui-button--secondary {
+            background: rgba(30,41,39,.92) !important;
+            color: var(--color-text-muted) !important;
+            border-color: var(--color-line) !important;
+        }
+
+        .ui-statusbar {
+            background: var(--surface-panel) !important;
+            border: 1px solid var(--color-line) !important;
+            border-radius: var(--radius-md) !important;
+            box-shadow: none !important;
+        }
+
+        .text-muted { color: var(--color-text-muted) !important; }
+
+        .race-track {
+            --track-start: 10%;
+            --track-end: 82%;
+        }
+
+        .race-axis {
+            background-image: repeating-linear-gradient(to right, rgba(251,191,36,.75) 0 2px, transparent 2px 10%);
         }
         /* Custom animations */
         @keyframes float {
@@ -94,13 +213,6 @@
         /* Mirror the knight so he faces right towards the spring on the right */
         .mirror-knight {
             transform: scaleX(-1);
-        }
-
-        /* Dynamic CSS variables for Custom Sliced / Uploaded Assets */
-        :root {
-            --border-sheet-url: none;
-            --button-sheet-url: none;
-            --main-bg-url: none;
         }
 
         /* Class utilizing custom border when borders.png is uploaded */
@@ -180,7 +292,7 @@
         <div id="leaf-container" class="absolute inset-0 pointer-events-none overflow-hidden z-0"></div>
 
         <!-- Upper Status Dashboard -->
-        <header class="bg-gradient-to-r from-emerald-950 via-green-900 to-emerald-950 text-white px-6 py-4 flex justify-between items-center z-10 border-b-4 border-emerald-600">
+        <header class="app-header text-white flex justify-between items-center z-10">
             <div class="flex items-center space-x-3">
                 <div class="bg-amber-400 p-2 rounded-full text-emerald-950 shadow-lg shadow-amber-400/20">
                     <!-- Pure Inline SVG Leaf Icon (No Font Dependency) -->
@@ -196,33 +308,30 @@
             
             <!-- Hero Dashboard Trophies (Now strictly utilizing fluid visual droplets instead of "cups") -->
             <div class="flex items-center space-x-4">
-                <div class="flex items-center space-x-2 bg-emerald-900/80 px-5 py-1.5 rounded-2xl border border-emerald-500/30">
+                <div class="ui-statusbar flex items-center space-x-2 px-5 py-1.5">
                     <span class="text-2xl text-amber-200">💧 구한 샘물:</span>
                     <div id="spring-visual-shelf" class="flex flex-col space-y-1 items-start min-w-[60px] max-w-[240px] py-1 max-h-[80px] overflow-y-auto">
                         <!-- Drops dynamically injected here with 10-unit line wrap grouping -->
                         <span class="text-stone-400 text-sm">없음</span>
                     </div>
                 </div>
-                <!-- Dynamic Image registration hub button -->
-                <button onclick="toggleAssetModal(true)" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-emerald-950 font-bold px-4 py-2 rounded-xl flex items-center space-x-1 shadow-lg transition">
-                    <span>⚙️ 이미지 등록</span>
-                </button>
+                <span class="text-emerald-200/80 text-sm font-bold">게임 이미지 포함 완료</span>
             </div>
         </header>
 
         <!-- Main Workspace Area -->
-        <main class="flex-1 flex relative z-10 overflow-hidden bg-stone-950">
+        <main class="flex-1 flex relative z-10 overflow-hidden bg-stone-950/45">
 
             <!-- ================= SETUP & RESULT COMBINED SCREEN (Landscape Split) ================= -->
-            <section id="screen-setup" class="w-full h-full flex p-6 space-x-6 transition-all duration-300">
+            <section id="screen-setup" class="screen-shell w-full h-full flex transition-all duration-300">
                 
                 <!-- Left Column: Story Banner / Live Reward Result Banner (If returning from battle) -->
-                <div class="flex-1 bg-gradient-to-b from-emerald-900 to-stone-900 border-2 border-emerald-600/40 rounded-3xl p-6 flex flex-col justify-between shadow-inner relative overflow-hidden">
+                <div class="ui-panel flex-1 p-6 flex flex-col justify-between relative overflow-hidden">
                     <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(52,211,153,0.15),transparent_50%)]"></div>
                     
                     <!-- Integrated dynamic feedback banner (Replaces pure story when game finishes) -->
                     <div id="dynamic-result-panel" class="z-10">
-                        <div id="default-story-banner" class="bg-emerald-950/70 border border-emerald-500/30 rounded-2xl p-4 text-center">
+                        <div id="default-story-banner" class="ui-statusbar p-4 text-center">
                             <p class="text-2xl text-amber-100 font-bold leading-relaxed">
                                 "불의 군단이 숲속 생명의 샘을 위협하고 있어!<br>
                                 수학 문제를 풀고 신비로운 샘물을 지켜줘!"
@@ -266,7 +375,7 @@
                     </div>
 
                     <!-- Adventure Tips -->
-                    <div class="text-center text-stone-400 text-sm z-10">
+                    <div class="text-muted text-center text-sm z-10">
                         🌿 보이지 않는 지식의 물방울 검이 더 강한 힘을 내도록 수학 리더를 해결하세요!
                     </div>
                 </div>
@@ -278,61 +387,61 @@
                     <div class="space-y-3 flex-1 flex flex-col justify-center">
                         
                         <!-- Page Input -->
-                        <div class="bg-stone-900/90 border border-emerald-800/60 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+                        <div class="ui-control flex items-center justify-between">
                             <div class="flex items-center space-x-3">
                                 <span class="text-3xl">📖</span>
                                 <span class="text-2xl font-bold text-stone-200">도전할 페이지</span>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button onclick="changeValue('page', -1)" class="w-12 h-12 bg-emerald-900/80 hover:bg-emerald-800 border border-emerald-600/40 active:scale-95 rounded-xl text-3xl font-bold text-amber-300 transition">-</button>
+                                <button onclick="changeValue('page', -1)" class="ui-icon-button w-12 h-12 text-3xl">-</button>
                                 <input id="input-page" type="number" value="24" class="w-20 text-center text-3xl font-bold text-white bg-stone-950 border border-emerald-800 rounded-xl py-1" readonly />
-                                <button onclick="changeValue('page', 1)" class="w-12 h-12 bg-emerald-900/80 hover:bg-emerald-800 border border-emerald-600/40 active:scale-95 rounded-xl text-3xl font-bold text-amber-300 transition">+</button>
+                                <button onclick="changeValue('page', 1)" class="ui-icon-button w-12 h-12 text-3xl">+</button>
                             </div>
                         </div>
 
                         <!-- Question Count Input -->
-                        <div class="bg-stone-900/90 border border-emerald-800/60 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+                        <div class="ui-control flex items-center justify-between">
                             <div class="flex items-center space-x-3">
                                 <span class="text-3xl">✍️</span>
                                 <span class="text-2xl font-bold text-stone-200">풀어야 할 문제 수</span>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button onclick="changeValue('questions', -1)" class="w-12 h-12 bg-emerald-900/80 hover:bg-emerald-800 border border-emerald-600/40 active:scale-95 rounded-xl text-3xl font-bold text-amber-300 transition">-</button>
+                                <button onclick="changeValue('questions', -1)" class="ui-icon-button w-12 h-12 text-3xl">-</button>
                                 <input id="input-questions" type="number" value="4" class="w-20 text-center text-3xl font-bold text-white bg-stone-950 border border-emerald-800 rounded-xl py-1" readonly />
-                                <button onclick="changeValue('questions', 1)" class="w-12 h-12 bg-emerald-900/80 hover:bg-emerald-800 border border-emerald-600/40 active:scale-95 rounded-xl text-3xl font-bold text-amber-300 transition">+</button>
+                                <button onclick="changeValue('questions', 1)" class="ui-icon-button w-12 h-12 text-3xl">+</button>
                             </div>
                         </div>
 
                         <!-- Time Limit Input -->
-                        <div class="bg-stone-900/90 border border-emerald-800/60 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+                        <div class="ui-control flex items-center justify-between">
                             <div class="flex items-center space-x-3">
                                 <span class="text-3xl">⏱️</span>
                                 <span class="text-2xl font-bold text-stone-200">문제당 제한 시간</span>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button onclick="changeValue('time', -10)" class="w-16 h-11 bg-emerald-900/80 hover:bg-emerald-800 border border-emerald-600/40 active:scale-90 rounded-xl text-base font-bold text-amber-300 transition">-10초</button>
+                                <button onclick="changeValue('time', -10)" class="ui-icon-button w-16 h-11 text-base">-10초</button>
                                 <div class="flex flex-col items-center px-2">
                                     <span id="display-time" class="text-3xl font-bold text-white leading-none">3:00</span>
                                     <span class="text-xs text-stone-400 mt-1">(기본 3분)</span>
                                 </div>
-                                <button onclick="changeValue('time', 10)" class="w-16 h-11 bg-emerald-900/80 hover:bg-emerald-800 border border-emerald-600/40 active:scale-90 rounded-xl text-base font-bold text-amber-300 transition">+10초</button>
+                                <button onclick="changeValue('time', 10)" class="ui-icon-button w-16 h-11 text-base">+10초</button>
                             </div>
                         </div>
 
                     </div>
 
                     <!-- Start Action Button (Dynamic CTA Text based on last play status) -->
-                    <button id="btn-start-adventure" onclick="startAdventure()" class="w-full bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white text-3xl font-bold py-5 rounded-2xl shadow-lg border-b-4 border-emerald-800 transform active:scale-95 transition-all flex items-center justify-center space-x-3">
+                    <button id="btn-start-adventure" onclick="startAdventure()" class="ui-button ui-button--primary w-full text-3xl py-5 flex items-center justify-center space-x-3">
                         <span id="start-btn-label">신비로운 모험 시작! (출발)</span>
                     </button>
                 </div>
             </section>
 
             <!-- ================= BATTLE SCREEN (Landscape Battle Arena) ================= -->
-            <section id="screen-battle" class="hidden w-full h-full flex flex-col justify-between p-6 transition-all duration-300">
+            <section id="screen-battle" class="screen-shell hidden w-full h-full flex flex-col justify-between transition-all duration-300">
                 
                 <!-- Battle Status Header -->
-                <div class="flex justify-between items-center bg-stone-900/95 border border-emerald-600/40 text-white px-6 py-2.5 rounded-2xl text-xl shadow-lg">
+                <div class="ui-statusbar flex justify-between items-center text-white px-6 py-2.5 text-xl">
                     <span class="font-bold text-cyan-300 flex items-center space-x-2">
                         <span>📖 수학 리더: <span class="text-white font-bold bg-emerald-950 px-3 py-1 rounded-lg">P. <span id="battle-current-page">24</span></span></span>
                     </span>
@@ -343,7 +452,7 @@
                 </div>
 
                 <!-- Landscape Dual Field Arena (Using AI Background Landscape) -->
-                <div class="relative flex-1 my-3 rounded-3xl overflow-hidden border-4 border-emerald-600 bg-stone-950 shadow-2xl flex flex-col">
+                <div class="race-track relative flex-1 my-3 rounded-3xl overflow-hidden border-4 border-emerald-600 bg-stone-950 shadow-2xl flex flex-col">
                     
                     <!-- Main Background Image applied directly from the user's asset -->
                     <div id="arena-background" class="absolute inset-0 z-0 bg-cover bg-center transition-all duration-500" 
@@ -373,14 +482,9 @@
                     <div class="relative flex-1 items-center z-10 p-6">
                         
                         <!-- Water Knight (Races towards the right spring) -->
-                        <div id="dynamic-knight-wrapper" class="absolute bottom-10 transition-all duration-1000 z-20 flex flex-col items-center space-y-1" style="left: 15%;">
+                        <div id="dynamic-knight-wrapper" class="absolute bottom-12 -translate-x-1/2 transition-all duration-1000 z-20 flex flex-col items-center space-y-1" style="left: 10%;">
                             <div class="w-20 h-6 bg-cyan-400/30 rounded-full blur-md absolute -bottom-1 animate-pulse"></div>
                             
-                            <!-- Displaying Coordinate above head -->
-                            <div class="bg-cyan-950/90 border border-cyan-400/50 text-cyan-300 text-xs px-2 py-0.5 rounded-md font-bold shadow-md">
-                                현재 위치: <span id="knight-coord-val">15</span>m
-                            </div>
-
                             <div id="knight-container" class="animate-float relative">
                                 <!-- Ice/Water Aura Upgrade Visual Indicator -->
                                 <div id="knight-aura" class="absolute -inset-6 bg-cyan-400/30 rounded-full blur-2xl hidden animate-pulse"></div>
@@ -395,14 +499,9 @@
                         </div>
 
                         <!-- Fire Monster (Also races towards the right spring) -->
-                        <div id="dynamic-monster-wrapper" class="absolute bottom-16 transition-all duration-1000 z-20 flex flex-col items-center space-y-1" style="left: 10%;">
+                        <div id="dynamic-monster-wrapper" class="absolute bottom-20 -translate-x-1/2 transition-all duration-1000 z-20 flex flex-col items-center space-y-1" style="left: 10%;">
                             <div class="w-20 h-6 bg-red-600/30 rounded-full blur-md absolute -bottom-1 animate-pulse"></div>
                             
-                            <!-- Displaying Coordinate above head -->
-                            <div class="bg-red-950/90 border border-red-400/50 text-red-300 text-xs px-2 py-0.5 rounded-md font-bold shadow-md">
-                                현재 위치: <span id="monster-coord-val">10</span>m
-                            </div>
-
                             <div id="monster-container" class="animate-monster-run">
                                 <img id="battle-monster-img" src="monster.png" 
                                      alt="불의 군단" 
@@ -415,44 +514,25 @@
 
                     </div>
 
-                    <!-- NEW: Pure Graphical Coordinate Scale Track Ruler -->
-                    <div class="absolute bottom-1 left-4 right-32 z-20 px-4 py-1 bg-stone-900/85 border border-amber-500/40 rounded-xl">
-                        <div class="flex justify-between text-[11px] text-amber-300 font-bold leading-none select-none relative h-4">
-                            <!-- Visual Tick Lines -->
-                            <div class="absolute top-3 left-0 right-0 h-1.5 border-t-2 border-dashed border-amber-500/60"></div>
-                            <span class="flex flex-col items-center">0m <b class="text-emerald-400">출발</b></span>
-                            <span>10m</span>
-                            <span>20m</span>
-                            <span>30m</span>
-                            <span>40m</span>
-                            <span>50m</span>
-                            <span>60m</span>
-                            <span>70m</span>
-                            <span>80m</span>
-                            <span>90m</span>
-                            <span class="flex flex-col items-center text-cyan-300">100m <b class="text-cyan-400">도착</b></span>
-                        </div>
+                    <!-- Shared race coordinate axis: actors and timer use these same endpoints. -->
+                    <div class="absolute bottom-2 left-[10%] right-[18%] z-20 h-9 text-xs font-bold select-none">
+                        <div class="race-axis absolute left-0 right-0 top-3 h-3 border-t-2 border-b border-amber-400/80"></div>
+                        <span class="absolute left-0 top-0 -translate-x-1/2 rounded bg-emerald-950/90 px-2 py-0.5 text-emerald-300">출발</span>
+                        <span class="absolute right-0 top-0 translate-x-1/2 rounded bg-cyan-950/90 px-2 py-0.5 text-cyan-300">샘물</span>
                     </div>
 
                     <!-- Real-Time Time Progress Bar inside the field with solved questions count -->
-                    <div class="px-6 py-4 bg-stone-950/95 border-t border-emerald-800/40 z-10 flex items-center justify-between space-x-6">
-                        <div class="flex items-center space-x-4 text-white shrink-0">
-                            <span class="text-cyan-300 font-bold flex items-center space-x-1.5">
-                                <span class="text-xl">⏳ 남은 시간</span>
-                            </span>
-                            <span id="battle-timer-text" class="text-3xl font-bold tracking-wider text-amber-300">03:00</span>
-                            
-                            <!-- Dynamic remaining questions indicator replaced with Completed Solved prediction based on timer -->
-                            <div class="bg-emerald-950/80 border border-emerald-600/40 px-3.5 py-1 rounded-xl text-base font-bold flex items-center space-x-2">
-                                <span class="text-stone-300">현재 예상 해결:</span>
-                                <span id="solved-questions-indicator" class="text-cyan-300 text-2xl">0</span>
-                                <span class="text-stone-300">/</span>
-                                <span id="solved-total-questions" class="text-stone-300 text-xl">4</span>
-                                <span class="text-stone-300">개 완료!</span>
+                    <div class="relative h-20 bg-stone-950/95 border-t border-emerald-800/40 z-10">
+                        <div class="absolute left-[10%] right-[18%] top-3">
+                            <div class="mb-1 flex items-end justify-between text-white">
+                                <span class="text-sm font-bold text-emerald-300">출발</span>
+                                <span class="flex items-center gap-2 text-cyan-300 font-bold">⏳ 남은 시간 <b id="battle-timer-text" class="text-2xl tracking-wider text-amber-300">03:00</b></span>
+                                <span class="text-sm font-bold text-cyan-300">샘물 도착</span>
                             </div>
-                        </div>
-                        <div class="flex-1 bg-stone-900 h-6 rounded-full overflow-hidden border border-emerald-800 relative shadow-inner">
-                            <div id="bar-timer" class="h-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-600 rounded-full transition-all duration-1000" style="width: 100%"></div>
+                            <div class="h-5 rounded-full overflow-hidden border border-emerald-700 bg-stone-900 shadow-inner">
+                                <div id="bar-timer" class="h-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-600 rounded-full transition-all duration-1000" style="width: 100%"></div>
+                            </div>
+                            <div class="mt-1 text-center text-sm font-bold text-stone-300">예상 해결 <span id="solved-questions-indicator" class="text-cyan-300 text-lg">0</span> / <span id="solved-total-questions">4</span>개</div>
                         </div>
                     </div>
                 </div>
@@ -460,11 +540,11 @@
                 <!-- Bottom Action Panel ( z-index secured ) -->
                 <div class="grid grid-cols-4 gap-4 shrink-0 relative z-30">
                     <!-- Abandon Button -->
-                    <button onclick="abortAdventure()" class="col-span-1 py-4 bg-stone-800 text-stone-300 border border-stone-700 rounded-2xl hover:bg-stone-700 active:scale-95 transition text-2xl font-bold flex items-center justify-center space-x-2 shadow-lg">
+                    <button onclick="abortAdventure()" class="ui-button ui-button--secondary col-span-1 py-4 text-2xl flex items-center justify-center space-x-2">
                         <span>🏃 포기하고 홈으로</span>
                     </button>
                     <!-- Giant Water Attack Button -->
-                    <button id="btn-attack" onclick="triggerAttack()" class="col-span-3 bg-gradient-to-r from-cyan-500 to-emerald-600 hover:from-cyan-600 hover:to-emerald-700 active:scale-95 text-white text-3xl font-bold py-4 rounded-2xl border-b-4 border-emerald-800 shadow-xl transition-all flex flex-col items-center justify-center space-y-0.5 relative overflow-hidden">
+                    <button id="btn-attack" onclick="triggerAttack()" class="ui-button ui-button--primary col-span-3 text-3xl py-4 flex flex-col items-center justify-center space-y-0.5 relative overflow-hidden">
                         <div class="flex items-center space-x-3">
                             <span>물방울 검 공격! ⚔️</span>
                         </div>
@@ -582,36 +662,21 @@
             }
         }
 
-        function getAsset(key) {
-            return new Promise((resolve) => {
-                // 1. Try LocalStorage for instant recovery after refresh
-                const cached = localStorage.getItem('water_knight_asset_' + key);
-                if (cached) {
-                    appLog(`로컬스토리지 캐시로부터 복구 성공: ${key}`, "success");
-                    return resolve(cached);
-                }
+        // All visual assets ship with the site. Relative URLs work both locally and
+        // under a GitHub Pages repository sub-path without CORS or browser storage.
+        const BUNDLED_ASSETS = Object.freeze({
+            bg: './bg.png',
+            knight: './knight.png',
+            monster: './monster.png',
+            splash: './splash.png',
+            spring: './spring.png',
+            buttons: './buttons.png',
+            borders: './borders.png',
+            slash: './slash.png'
+        });
 
-                // 2. Try IndexedDB
-                if (!db) {
-                    appLog("에셋 탐색 보류 (IndexedDB 준비 안 됨): " + key, "error");
-                    return resolve(null);
-                }
-                const transaction = db.transaction(['assets'], 'readonly');
-                const store = transaction.objectStore('assets');
-                const request = store.get(key);
-                request.onsuccess = (event) => {
-                    if (event.target.result) {
-                        appLog(`IndexedDB 캐시로부터 복구 성공: ${key}`, "success");
-                        resolve(event.target.result.data);
-                    } else {
-                        resolve(null);
-                    }
-                };
-                request.onerror = () => {
-                    appLog("저장소 읽기 오류가 발견되었습니다: " + key, "error");
-                    resolve(null);
-                };
-            });
+        function getAsset(key) {
+            return Promise.resolve(BUNDLED_ASSETS[key] || null);
         }
 
         // CHROMACUT TECHNOLOGY: Automatic pure white background removal filter
@@ -739,7 +804,9 @@
                 }
 
                 const buttonsData = await getAsset('buttons');
-                if (buttonsData) {
+                // Decorative sheets are retained as source assets, but are not
+                // stretched over controls; system components define the UI.
+                if (false && buttonsData) {
                     // CRITICAL FIX: Since 'buttons.png' contains individual droplet buttons, do NOT slice them, use natively!
                     document.documentElement.style.setProperty('--button-sheet-url', `url('${buttonsData}')`);
                     document.getElementById('badge-file-buttons')?.classList.add('bg-emerald-900', 'text-amber-300', 'border-emerald-600');
@@ -762,7 +829,7 @@
                 }
 
                 const bordersData = await getAsset('borders');
-                if (bordersData) {
+                if (false && bordersData) {
                     // Since new borders.png is a single clean framework with no internal panels, use it natively via border-image stretching!
                     document.documentElement.style.setProperty('--border-sheet-url', `url('${bordersData}')`);
                     document.getElementById('badge-file-borders')?.classList.add('bg-emerald-900', 'text-amber-300', 'border-emerald-600');
@@ -1217,12 +1284,14 @@
             // SIMULTANEOUS RACING MOVEMENT FORMULA (Now racing Left to Right):
             // Goal (Spring of Life) is placed on the Right side of the screen (~85%).
             // Time ratio spent: progress ranges from 0 (at start) to 1 (when timer finishes).
-            // Knight starts at left: 15% and races to 70%.
-            // Volcano Monster starts further left: 10% and runs faster to catch up/exceed at 82%.
+            // Both racers use the exact same 10%-82% axis drawn in the arena.
             const progress = 1 - (state.currentTimeRemaining / state.totalTimer); // starts at 0, goes to 1
 
-            const knightLeft = 15 + (55 * progress); // 15% up to 70%
-            const monsterLeft = 10 + (72 * progress); // 10% up to 82%
+            const trackStart = 10;
+            const trackEnd = 82;
+            const trackLength = trackEnd - trackStart;
+            const knightLeft = trackStart + (trackLength * 0.9 * progress);
+            const monsterLeft = trackStart + (trackLength * progress);
 
             const dKnight = document.getElementById('dynamic-knight-wrapper');
             const dMonster = document.getElementById('dynamic-monster-wrapper');
@@ -1230,15 +1299,6 @@
             if (dKnight) dKnight.style.left = `${knightLeft}%`;
             if (dMonster) dMonster.style.left = `${monsterLeft}%`;
 
-            // Update numerical Coordinate meters on HUD labels (scaled from 0m to 100m)
-            const knightMeters = Math.round(15 + (55 * progress));
-            const monsterMeters = Math.round(10 + (72 * progress));
-
-            const knightLbl = document.getElementById('knight-coord-val');
-            const monsterLbl = document.getElementById('monster-coord-val');
-
-            if (knightLbl) knightLbl.textContent = knightMeters;
-            if (monsterLbl) monsterLbl.textContent = monsterMeters;
         }
 
         async function triggerAttack() {
@@ -1275,7 +1335,7 @@
                             impactSlash.style.backgroundImage = `url('${customSlash}')`;
                         } else {
                             // Default fallback
-                            impactSlash.style.backgroundImage = "url('ChatGPT Image 2026년 7월 20일 오전 04_10_22.png')";
+                            impactSlash.style.backgroundImage = `url('${BUNDLED_ASSETS.slash}')`;
                         }
                         impactSlash.style.backgroundSize = 'contain';
                         impactSlash.style.backgroundRepeat = 'no-repeat';
@@ -1435,7 +1495,7 @@
                         runSpriteAnimation(splashData);
                     } else {
                         // Use raw image fallback from workspace
-                        runSpriteAnimation("ChatGPT Image 2026년 7월 20일 오전 03_02_03.png");
+                        runSpriteAnimation(BUNDLED_ASSETS.splash);
                     }
                 });
                 
@@ -1444,7 +1504,7 @@
                 
                 if (startBtnLabel) startBtnLabel.textContent = `P. ${state.currentPage} 다음 모험 시작!`;
                 if (startBtn) {
-                    startBtn.className = "w-full bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white text-3xl font-bold py-5 rounded-2xl shadow-lg border-b-4 border-emerald-800 transform active:scale-95 transition-all flex items-center justify-center space-x-3";
+                    startBtn.className = "ui-button ui-button--primary w-full text-3xl py-5 flex items-center justify-center space-x-3";
                 }
                 
                 saveStats();
@@ -1472,7 +1532,7 @@
                 
                 if (startBtnLabel) startBtnLabel.textContent = `P. ${state.currentPage} 재도전 시작!`;
                 if (startBtn) {
-                    startBtn.className = "w-full bg-gradient-to-r from-red-600 to-amber-700 hover:from-red-700 hover:to-amber-800 text-white text-3xl font-bold py-5 rounded-2xl shadow-lg border-b-4 border-red-900 transform active:scale-95 transition-all flex items-center justify-center space-x-3";
+                    startBtn.className = "ui-button ui-button--primary w-full text-3xl py-5 flex items-center justify-center space-x-3";
                 }
 
                 // Empty spring showcase in result card on loss
@@ -1630,15 +1690,12 @@
 
         // Window Initializer
         window.onload = async function () {
-            // 1. Init internal Database
-            await initDatabase();
-            
-            // 2. Load stored settings
+            // Load settings and bundled repository assets. No browser-side image
+            // registration or storage permission is required.
             loadStats();
             formatTimeDisplay();
             initLeafRain();
 
-            // 3. Apply assets from database
             await applyDatabaseAssets();
         };
     </script>
