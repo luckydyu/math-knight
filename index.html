@@ -75,6 +75,68 @@
             border-bottom: 1px solid var(--color-line) !important;
         }
 
+        .header-summary {
+            display: grid;
+            gap: .35rem;
+            min-width: 19rem;
+        }
+
+        .reward-counter { justify-content: space-between; }
+
+        .reward-badge-shelf {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center;
+            justify-content: flex-end;
+            gap: .45rem;
+            max-width: none !important;
+            max-height: none !important;
+            overflow: visible !important;
+        }
+
+        .reward-badge-item {
+            display: inline-flex;
+            align-items: center;
+            gap: .2rem;
+            flex: 0 0 auto;
+            color: var(--color-water-400);
+            font-size: .85rem;
+            font-weight: 800;
+        }
+
+        .reward-badge-image {
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 50%;
+            object-fit: cover;
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,.38));
+        }
+
+        .reward-badge-shelf--result {
+            justify-content: center;
+            min-height: 3.5rem;
+        }
+
+        .reward-badge-shelf--result .reward-badge-image {
+            width: 3.5rem;
+            height: 3.5rem;
+        }
+
+        .today-completed {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+            padding: .25rem .75rem;
+            border: 1px solid var(--color-line);
+            border-radius: .7rem;
+            background: rgba(7,28,24,.72);
+            color: var(--color-text-muted);
+            font-size: .75rem;
+        }
+
+        .today-completed strong { color: var(--color-water-400); }
+
         .screen-shell {
             padding: var(--space-3) !important;
             gap: var(--space-3) !important;
@@ -641,9 +703,6 @@
             top: 50%;
             right: calc(100% + .5rem);
             z-index: 2;
-            max-width: 7rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
             transform: translateY(-50%);
         }
 
@@ -769,7 +828,9 @@
             .brand-mark svg { width: 1.25rem !important; height: 1.25rem !important; }
             .reward-counter { padding: .35rem .7rem !important; }
             .reward-counter > span { font-size: 1rem !important; }
-            #spring-visual-shelf { max-height: 2.25rem !important; }
+            .header-summary { min-width: 14rem; gap: .2rem; }
+            .reward-badge-image { width: 2rem; height: 2rem; }
+            .today-completed { padding: .15rem .5rem; font-size: .65rem; }
 
             .screen-shell { padding: .5rem !important; gap: .5rem !important; }
             .ui-panel { border-radius: 1rem !important; }
@@ -1030,13 +1091,17 @@
             </div>
             
             <!-- Hero Dashboard Trophies (Now strictly utilizing fluid visual droplets instead of "cups") -->
-            <div class="flex items-center space-x-4">
+            <div class="header-summary">
                 <div class="ui-statusbar reward-counter flex items-center space-x-2 px-5 py-1.5" role="status" aria-live="polite" aria-atomic="true">
                     <span class="text-2xl text-amber-200">💧 구한 샘물:</span>
-                    <div id="spring-visual-shelf" class="flex flex-col space-y-1 items-start min-w-[60px] max-w-[240px] py-1 max-h-[80px] overflow-y-auto">
-                        <!-- Drops dynamically injected here with 10-unit line wrap grouping -->
+                    <div id="spring-visual-shelf" class="reward-badge-shelf">
+                        <!-- 10-unit and 1-unit badges injected dynamically -->
                         <span class="text-stone-400 text-sm">없음</span>
                     </div>
+                </div>
+                <div class="today-completed" role="status" aria-live="polite" aria-atomic="true">
+                    <span>오늘 완료한 페이지</span>
+                    <strong id="today-completed-pages">아직 없음</strong>
                 </div>
             </div>
         </header>
@@ -1160,8 +1225,8 @@
                         <div id="result-spring-showcase-container" class="result-reward">
                             <span class="setup-eyebrow">이번 모험의 보상</span>
                             <strong>생명의 샘물</strong>
-                            <div id="result-spring-visual-shelf" class="flex flex-wrap gap-2 justify-center max-w-md max-h-[96px] overflow-y-auto">
-                                <!-- Miniature springs injected dynamically here -->
+                            <div id="result-spring-visual-shelf" class="reward-badge-shelf reward-badge-shelf--result">
+                                <!-- Accumulated reward badges injected dynamically here -->
                             </div>
                         </div>
                     </div>
@@ -1311,6 +1376,8 @@
             totalTimer: 0,
             currentTimeRemaining: 0,
             springCount: 0,
+            completedDate: '',
+            completedPages: [],
             winStreak: 0,
             timerInterval: null,
             lastResult: null // 'victory' | 'defeat' | null
@@ -1329,7 +1396,9 @@
             monster: './monster.png',
             splash: './splash.png',
             spring: './spring.png',
-            slash: './slash.png'
+            slash: './slash.png',
+            springBadge1: './spring-badge-1.png',
+            springBadge10: './spring-badge-10.png'
         });
 
         function getAsset(key) {
@@ -1455,13 +1524,49 @@
             }
         }
 
+        function getLocalDateKey() {
+            const now = new Date();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${now.getFullYear()}-${month}-${day}`;
+        }
+
+        function ensureTodayCompletionState() {
+            const today = getLocalDateKey();
+            if (state.completedDate !== today) {
+                state.completedDate = today;
+                state.completedPages = [];
+            }
+        }
+
+        function recordCompletedPage(page) {
+            ensureTodayCompletionState();
+            if (!state.completedPages.includes(page)) {
+                state.completedPages.push(page);
+                state.completedPages.sort((a, b) => a - b);
+            }
+        }
+
         // Load Persistent Storage
         function loadStats() {
             const savedSpring = localStorage.getItem('water_knight_springs_landscape_v3');
             const savedPage = localStorage.getItem('water_knight_page_landscape_v3');
+            const savedCompleted = localStorage.getItem('water_knight_completed_pages_v1');
             
             if (savedSpring) state.springCount = parseInt(savedSpring);
             if (savedPage) state.currentPage = parseInt(savedPage);
+            if (savedCompleted) {
+                try {
+                    const parsed = JSON.parse(savedCompleted);
+                    state.completedDate = parsed.date || '';
+                    state.completedPages = Array.isArray(parsed.pages)
+                        ? parsed.pages.filter(Number.isInteger)
+                        : [];
+                } catch (error) {
+                    appLog(`오늘 완료 페이지 기록을 복원하지 못했습니다: ${error.message}`, 'error');
+                }
+            }
+            ensureTodayCompletionState();
 
             appLog(`설정 값 복원 완료 - 샘물 수: ${state.springCount}개, 현재 페이지: ${state.currentPage}P`, "info");
             updateDashboardUI();
@@ -1470,6 +1575,10 @@
         function saveStats() {
             localStorage.setItem('water_knight_springs_landscape_v3', state.springCount);
             localStorage.setItem('water_knight_page_landscape_v3', state.currentPage);
+            localStorage.setItem('water_knight_completed_pages_v1', JSON.stringify({
+                date: state.completedDate,
+                pages: state.completedPages
+            }));
             appLog("설정값이 로컬스토리지에 무사히 영구 보관되었습니다.", "success");
         }
 
@@ -1649,7 +1758,7 @@
                 if (aura) aura.classList.remove('hidden');
                 if (setupGlow) setupGlow.classList.remove('hidden');
                 if (playerTitle) {
-                    playerTitle.textContent = "⚡ 전설의 물방울 기사";
+                    playerTitle.textContent = "전설의 물방울 기사";
                     playerTitle.className = "racer__label text-white px-3 py-1 text-sm font-bold tracking-wider animate-pulse";
                 }
                 if (setupBadge) {
@@ -1659,7 +1768,7 @@
             } else {
                 if (aura) aura.classList.add('hidden');
                 if (setupGlow) setupGlow.classList.add('hidden');
-                const lvlText = state.winStreak > 0 ? `🌊 물방울 기사 (Lvl.${state.winStreak + 1})` : "💧 아기 물방울 기사";
+                const lvlText = state.winStreak > 0 ? `물방울 기사 (Lvl.${state.winStreak + 1})` : "아기 물방울 기사";
                 if (playerTitle) {
                     playerTitle.textContent = lvlText;
                     playerTitle.className = "racer__label text-white px-3 py-1 text-sm font-bold tracking-wider";
@@ -1954,6 +2063,7 @@
                 soundVictory();
                 state.winStreak++;
                 state.springCount += 1;
+                recordCompletedPage(state.currentPage);
                 appLog(`축하합니다! 모험 성공. 구한 총 샘물 수: ${state.springCount}개`, "success");
                 
                 // Show gorgeous emerald success alert
@@ -2046,90 +2156,64 @@
             showScreen('screen-setup');
         }
 
-        // Custom 10-Unit Row Break Visualizer
-        async function updateDashboardUI() {
-            const shelf = document.getElementById('spring-visual-shelf');
-            if (!shelf) return;
-            
-            shelf.innerHTML = '';
-            
-            if (state.springCount === 0) {
-                shelf.innerHTML = '<span class="text-stone-400 text-sm">없음</span>';
+        function renderSpringBadges(container, total) {
+            if (!container) return;
+            container.innerHTML = '';
+            container.setAttribute('aria-label', `구한 샘물 총 ${total}개`);
+
+            if (total === 0) {
+                container.innerHTML = '<span class="text-stone-400 text-sm">없음</span>';
                 return;
             }
 
-            // Retrieve spring asset if saved to build premium rewards shelf
-            const springData = await getAsset('spring');
+            const badgeGroups = [
+                { unit: 10, count: Math.floor(total / 10), src: BUNDLED_ASSETS.springBadge10 },
+                { unit: 1, count: total % 10, src: BUNDLED_ASSETS.springBadge1 }
+            ].filter(group => group.count > 0);
 
-            // Arrange droplets into rows of max 10 for rapid intuitive counting
-            const maxDropsPerRow = 10;
-            const rowCount = Math.ceil(state.springCount / maxDropsPerRow);
+            badgeGroups.forEach((group, index) => {
+                const item = document.createElement('span');
+                item.className = 'reward-badge-item animate-spring-pop';
+                item.style.animationDelay = `${index * 0.08}s`;
+                item.setAttribute('aria-label', `${group.unit}개 뱃지 ${group.count}장`);
 
-            for (let r = 0; r < rowCount; r++) {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'flex items-center space-x-1 py-0.5';
+                const badge = document.createElement('img');
+                badge.src = group.src;
+                badge.alt = '';
+                badge.draggable = false;
+                badge.className = 'reward-badge-image select-none';
 
-                const dropsInThisRow = Math.min(maxDropsPerRow, state.springCount - (r * maxDropsPerRow));
-                
-                for (let i = 0; i < dropsInThisRow; i++) {
-                    if (springData) {
-                        const miniImg = document.createElement('img');
-                        miniImg.src = springData;
-                        miniImg.className = 'w-7 h-7 object-contain animate-spring-pop select-none';
-                        miniImg.style.mixBlendMode = 'screen';
-                        miniImg.style.animationDelay = `${(r * maxDropsPerRow + i) * 0.05}s`;
-                        rowDiv.appendChild(miniImg);
-                    } else {
-                        const drop = document.createElement('span');
-                        drop.className = 'text-2xl inline-block animate-spring-pop select-none';
-                        drop.style.animationDelay = `${(r * maxDropsPerRow + i) * 0.05}s`;
-                        drop.innerHTML = '💧';
-                        rowDiv.appendChild(drop);
-                    }
-                }
+                const count = document.createElement('span');
+                count.setAttribute('aria-hidden', 'true');
+                count.textContent = `×${group.count}`;
 
-                // Add a small numeric count badge at the end of the last row for quick reading
-                if (r === rowCount - 1) {
-                    const counterBadge = document.createElement('span');
-                    counterBadge.className = 'text-sm font-bold text-cyan-300 ml-1.5 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-500/40';
-                    counterBadge.textContent = `x${state.springCount}`;
-                    rowDiv.appendChild(counterBadge);
-                }
-
-                shelf.appendChild(rowDiv);
-            }
+                item.append(badge, count);
+                container.appendChild(item);
+            });
         }
 
-        async function updateResultSpringShowcase() {
-            const resShelf = document.getElementById('result-spring-visual-shelf');
-            if (!resShelf) return;
+        function updateTodayCompletedPages() {
+            ensureTodayCompletionState();
+            const display = document.getElementById('today-completed-pages');
+            if (!display) return;
 
-            resShelf.innerHTML = '';
-
-            if (state.springCount === 0) {
-                resShelf.innerHTML = '<span class="text-stone-400 text-sm">없음</span>';
+            if (state.completedPages.length === 0) {
+                display.textContent = '아직 없음';
                 return;
             }
 
-            const springData = await getAsset('spring');
+            const first = state.completedPages[0];
+            const last = state.completedPages[state.completedPages.length - 1];
+            display.textContent = first === last ? `P. ${first}` : `P. ${first}–${last}`;
+        }
 
-            // Render exact spring representations matching the accumulated amount
-            for (let i = 0; i < state.springCount; i++) {
-                if (springData) {
-                    const miniImg = document.createElement('img');
-                    miniImg.src = springData;
-                    miniImg.className = 'w-8 h-8 object-contain animate-spring-pop select-none';
-                    miniImg.style.mixBlendMode = 'screen';
-                    miniImg.style.animationDelay = `${i * 0.04}s`;
-                    resShelf.appendChild(miniImg);
-                } else {
-                    const drop = document.createElement('span');
-                    drop.className = 'text-2xl inline-block animate-spring-pop select-none';
-                    drop.style.animationDelay = `${i * 0.04}s`;
-                    drop.innerHTML = '💧';
-                    resShelf.appendChild(drop);
-                }
-            }
+        function updateDashboardUI() {
+            renderSpringBadges(document.getElementById('spring-visual-shelf'), state.springCount);
+            updateTodayCompletedPages();
+        }
+
+        function updateResultSpringShowcase() {
+            renderSpringBadges(document.getElementById('result-spring-visual-shelf'), state.springCount);
         }
 
         // Window Initializer
