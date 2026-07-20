@@ -520,7 +520,7 @@
         .text-muted { color: var(--color-text-muted) !important; }
 
         .race-track {
-            --track-start: 12%;
+            --track-start: 18%;
             --track-end: 86%;
         }
 
@@ -636,9 +636,23 @@
             white-space: nowrap;
         }
 
+        .racer__label {
+            position: absolute;
+            top: 50%;
+            right: calc(100% + .5rem);
+            z-index: 2;
+            max-width: 7rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transform: translateY(-50%);
+        }
+
         .racer {
             transform: translateX(-50%);
             will-change: left;
+            transition-property: left !important;
+            transition-duration: 1s !important;
+            transition-timing-function: linear !important;
         }
 
         .racer--knight { bottom: 2.25rem !important; }
@@ -677,19 +691,20 @@
         .battle-progress {
             position: relative;
             z-index: 20;
-            display: grid;
-            grid-template-columns: 9rem minmax(0, 1fr) 9rem;
-            align-items: center;
-            gap: var(--space-2);
+            display: block !important;
             padding: .75rem var(--space-3);
             border-top: 1px solid var(--color-line);
             background: var(--surface-strong);
         }
 
         .battle-progress__time {
+            position: absolute;
+            left: var(--space-3);
+            top: 50%;
             display: flex;
             flex-direction: column;
             line-height: 1;
+            transform: translateY(-50%);
         }
 
         .battle-progress__time small,
@@ -697,21 +712,34 @@
         .battle-progress__time strong { margin-top: .25rem; color: var(--color-gold-500); font-size: 1.75rem; }
 
         .battle-progress__bar {
+            position: absolute;
+            left: var(--track-start);
+            right: calc(100% - var(--track-end));
+            top: 50%;
             height: 1.25rem;
             overflow: hidden;
             border: 1px solid var(--color-line);
             border-radius: 999px;
             background: rgba(7,28,24,.9);
+            transform: translateY(-50%);
         }
 
         .battle-progress__fill {
             height: 100%;
+            margin-left: auto;
             border-radius: inherit;
             background: linear-gradient(90deg, #0d9488, #22d3ee);
+            box-shadow: -4px 0 10px rgba(34,211,238,.45);
             transition: width 1s linear;
         }
 
-        .battle-progress__solved { text-align: right; }
+        .battle-progress__solved {
+            position: absolute;
+            right: var(--space-3);
+            top: 50%;
+            text-align: right;
+            transform: translateY(-50%);
+        }
         .battle-progress__solved strong { display: block; margin-top: .2rem; color: var(--color-water-400); font-size: 1.25rem; }
 
         .battle-actions {
@@ -725,6 +753,7 @@
 
         @media (max-height: 650px) {
             body { padding: .5rem !important; }
+            .race-track { --track-start: 21%; }
             .landscape-console {
                 max-height: calc(100dvh - 1rem);
                 border-radius: 1rem !important;
@@ -781,7 +810,9 @@
             .battle-status__item--center { display: none !important; }
             .status-value { padding: .15rem .4rem; font-size: .8rem; }
             .battle-card { grid-template-rows: minmax(0, 1fr) 3rem; }
-            .battle-progress { grid-template-columns: 5.5rem minmax(0, 1fr) 5.5rem; gap: .5rem; padding: .35rem .75rem; }
+            .battle-progress { padding: .35rem .75rem; }
+            .battle-progress__time { left: .75rem; }
+            .battle-progress__solved { right: .75rem; }
             .battle-progress__time small,
             .battle-progress__solved small { display: none; }
             .battle-progress__time strong { margin: 0; font-size: 1rem; line-height: 1; }
@@ -1720,17 +1751,16 @@
 
             const raceTrack = document.querySelector('.race-track');
             const raceStyles = raceTrack ? getComputedStyle(raceTrack) : null;
-            const trackStart = parseFloat(raceStyles?.getPropertyValue('--track-start')) || 12;
+            const trackStart = parseFloat(raceStyles?.getPropertyValue('--track-start')) || 18;
             const trackEnd = parseFloat(raceStyles?.getPropertyValue('--track-end')) || 86;
             const trackLength = trackEnd - trackStart;
-            const knightLeft = trackStart + (trackLength * 0.9 * progress);
-            const monsterLeft = trackStart + (trackLength * progress);
+            const racerLeft = trackStart + (trackLength * progress);
 
             const dKnight = document.getElementById('dynamic-knight-wrapper');
             const dMonster = document.getElementById('dynamic-monster-wrapper');
             
-            if (dKnight) dKnight.style.left = `${knightLeft}%`;
-            if (dMonster) dMonster.style.left = `${monsterLeft}%`;
+            if (dKnight) dKnight.style.left = `${racerLeft}%`;
+            if (dMonster) dMonster.style.left = `${racerLeft}%`;
 
         }
 
