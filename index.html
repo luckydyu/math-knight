@@ -41,11 +41,12 @@
             --main-bg-url: none;
         }
 
+        *, *::before, *::after { box-sizing: border-box; }
+
         body, input, button, select, textarea, div, span, p, h1, h2, h3, h4, h5, h6 {
             font-family: 'Gaegu', cursive, sans-serif !important;
             user-select: none;
             -webkit-user-select: none;
-            box-sizing: border-box;
         }
         body {
             background-color: #022c22; /* Deep forest green */
@@ -281,12 +282,210 @@
         .text-muted { color: var(--color-text-muted) !important; }
 
         .race-track {
-            --track-start: 10%;
-            --track-end: 82%;
+            --track-start: 12%;
+            --track-end: 86%;
         }
 
         .race-axis {
             background-image: repeating-linear-gradient(to right, rgba(251,191,36,.75) 0 2px, transparent 2px 10%);
+        }
+
+        /* Step 3: battle-screen wireframe and shared race coordinate system */
+        .battle-layout {
+            display: grid !important;
+            grid-template-rows: auto minmax(0, 1fr) auto;
+            min-height: 0;
+        }
+
+        .battle-status {
+            display: grid !important;
+            grid-template-columns: minmax(10rem, .8fr) minmax(0, 1.5fr) minmax(10rem, .8fr);
+            align-items: center;
+            gap: var(--space-2);
+            min-height: 4rem;
+            padding: .75rem var(--space-2) !important;
+        }
+
+        .battle-status__item {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            min-width: 0;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .battle-status__item--center {
+            justify-content: center;
+            overflow: hidden;
+            color: var(--color-gold-500);
+            text-align: center;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .battle-status__item--center.is-danger {
+            color: #fca5a5;
+            background: rgba(127,29,29,.35);
+            border-radius: .5rem;
+        }
+
+        .battle-status__item--end { justify-content: flex-end; }
+
+        .status-value {
+            padding: .25rem .625rem;
+            border: 1px solid var(--color-line);
+            border-radius: .5rem;
+            background: rgba(7,28,24,.8);
+            color: var(--color-text);
+            font-size: 1.125rem;
+        }
+
+        .battle-card {
+            display: grid !important;
+            grid-template-rows: minmax(0, 1fr) 5.25rem;
+            min-height: 0;
+            margin: 0 !important;
+            background: rgba(7,28,24,.9) !important;
+            border: 1px solid var(--color-line) !important;
+            border-radius: var(--radius-lg) !important;
+            box-shadow: var(--shadow-panel) !important;
+        }
+
+        .race-stage {
+            position: relative;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .race-scenery {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background-position: center;
+            background-size: cover;
+        }
+
+        .race-scenery::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(7,28,24,.18), rgba(7,28,24,.78));
+        }
+
+        .race-goal {
+            position: absolute !important;
+            left: var(--track-end) !important;
+            right: auto !important;
+            top: 48% !important;
+            transform: translate(-50%, -50%) !important;
+            z-index: 15;
+        }
+
+        .race-goal__label,
+        .racer__label {
+            border: 1px solid var(--color-line) !important;
+            border-radius: 999px !important;
+            background: rgba(7,28,24,.88) !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,.25) !important;
+            white-space: nowrap;
+        }
+
+        .racer {
+            transform: translateX(-50%);
+            will-change: left;
+        }
+
+        .racer--knight { bottom: 2.6rem !important; }
+        .racer--monster { bottom: 7.4rem !important; }
+
+        .race-scale {
+            position: absolute;
+            left: var(--track-start);
+            right: calc(100% - var(--track-end));
+            bottom: .4rem;
+            z-index: 20;
+            height: 2rem;
+        }
+
+        .race-scale__line {
+            position: absolute;
+            inset: .75rem 0 auto;
+            height: .65rem;
+            border-top: 2px solid rgba(246,196,83,.8);
+            border-bottom: 1px solid rgba(246,196,83,.45);
+        }
+
+        .race-scale__label {
+            position: absolute;
+            top: 0;
+            padding: .1rem .45rem;
+            border-radius: .4rem;
+            background: rgba(7,28,24,.88);
+            font-size: .75rem;
+            font-weight: 700;
+        }
+
+        .race-scale__label--start { left: 0; transform: translateX(-50%); color: #6ee7b7; }
+        .race-scale__label--end { right: 0; transform: translateX(50%); color: var(--color-water-400); }
+
+        .battle-progress {
+            position: relative;
+            z-index: 20;
+            display: grid;
+            grid-template-columns: 9rem minmax(0, 1fr) 9rem;
+            align-items: center;
+            gap: var(--space-2);
+            padding: .75rem var(--space-3);
+            border-top: 1px solid var(--color-line);
+            background: var(--surface-strong);
+        }
+
+        .battle-progress__time {
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+        }
+
+        .battle-progress__time small,
+        .battle-progress__solved small { color: var(--color-text-muted); font-size: .8rem; }
+        .battle-progress__time strong { margin-top: .25rem; color: var(--color-gold-500); font-size: 1.75rem; }
+
+        .battle-progress__bar {
+            height: 1.25rem;
+            overflow: hidden;
+            border: 1px solid var(--color-line);
+            border-radius: 999px;
+            background: rgba(7,28,24,.9);
+        }
+
+        .battle-progress__fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #0d9488, #22d3ee);
+            transition: width 1s linear;
+        }
+
+        .battle-progress__solved { text-align: right; }
+        .battle-progress__solved strong { display: block; margin-top: .2rem; color: var(--color-water-400); font-size: 1.25rem; }
+
+        .battle-actions {
+            display: grid !important;
+            grid-template-columns: minmax(11rem, 1fr) minmax(0, 3fr);
+            gap: var(--space-2) !important;
+            min-height: 4.75rem;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
         /* Custom animations */
         @keyframes float {
@@ -586,24 +785,28 @@
             </section>
 
             <!-- ================= BATTLE SCREEN (Landscape Battle Arena) ================= -->
-            <section id="screen-battle" class="screen-shell hidden w-full h-full flex flex-col justify-between transition-all duration-300">
+            <section id="screen-battle" class="screen-shell battle-layout hidden w-full h-full transition-all duration-300" aria-labelledby="battle-screen-title">
                 
                 <!-- Battle Status Header -->
-                <div class="ui-statusbar flex justify-between items-center text-white px-6 py-2.5 text-xl">
-                    <span class="font-bold text-cyan-300 flex items-center space-x-2">
-                        <span>📖 수학 리더: <span class="text-white font-bold bg-emerald-950 px-3 py-1 rounded-lg">P. <span id="battle-current-page">24</span></span></span>
-                    </span>
-                    <span id="threat-indicator" class="text-amber-300 font-bold animate-pulse">🌳 두 영웅이 숲속의 샘물을 향해 질주하고 있습니다!</span>
-                    <span class="font-bold text-amber-400 flex items-center space-x-2">
-                        <span>🎯 목표: <span id="battle-total-questions" class="text-white font-bold bg-amber-950 px-3 py-1 rounded-lg">4</span>문제 해결</span>
-                    </span>
+                <div class="ui-statusbar battle-status">
+                    <div class="battle-status__item">
+                        <span>📖 학습 페이지</span>
+                        <span class="status-value">P. <span id="battle-current-page">24</span></span>
+                    </div>
+                    <h2 id="battle-screen-title" class="sr-only">생명의 샘 레이스</h2>
+                    <div id="threat-indicator" class="battle-status__item battle-status__item--center">두 영웅이 생명의 샘을 향해 달리고 있어요</div>
+                    <div class="battle-status__item battle-status__item--end">
+                        <span>🎯 해결 목표</span>
+                        <span class="status-value"><span id="battle-total-questions">4</span>문제</span>
+                    </div>
                 </div>
 
                 <!-- Landscape Dual Field Arena (Using AI Background Landscape) -->
-                <div class="race-track relative flex-1 my-3 rounded-3xl overflow-hidden border-4 border-emerald-600 bg-stone-950 shadow-2xl flex flex-col">
+                <div class="race-track battle-card overflow-hidden">
+                    <div class="race-stage">
                     
                     <!-- Main Background Image applied directly from the user's asset -->
-                    <div id="arena-background" class="absolute inset-0 z-0 bg-cover bg-center transition-all duration-500" 
+                    <div id="arena-background" class="race-scenery transition-all duration-500"
                          style="background-image: url('bg.png');">
                         
                         <!-- Semi-transparent gradient overlay to ensure visual clarity of characters -->
@@ -614,8 +817,8 @@
                     </div>
 
                     <!-- Landmark label representing the Spring of Life at the far right -->
-                    <div id="spring-shrine-wrapper" class="absolute right-6 top-1/2 -translate-y-1/2 z-20 flex flex-col items-center">
-                        <div class="bg-emerald-600/90 border-2 border-amber-300 text-white px-4 py-1.5 rounded-full text-base font-bold shadow-lg animate-bounce flex items-center space-x-1">
+                    <div id="spring-shrine-wrapper" class="race-goal flex flex-col items-center">
+                        <div class="race-goal__label text-white px-3 py-1 text-sm font-bold flex items-center space-x-1">
                             <span class="text-cyan-300">💧</span>
                             <span>생명의 샘 도착지</span>
                         </div>
@@ -627,10 +830,10 @@
                     </div>
 
                     <!-- Arena Core Actors Container -->
-                    <div class="relative flex-1 items-center z-10 p-6">
+                    <div class="absolute inset-0 z-10">
                         
                         <!-- Water Knight (Races towards the right spring) -->
-                        <div id="dynamic-knight-wrapper" class="absolute bottom-12 -translate-x-1/2 transition-all duration-1000 z-20 flex flex-col items-center space-y-1" style="left: 10%;">
+                        <div id="dynamic-knight-wrapper" class="racer racer--knight absolute transition-all duration-1000 z-20 flex flex-col items-center space-y-1" style="left: var(--track-start);">
                             <div class="w-20 h-6 bg-cyan-400/30 rounded-full blur-md absolute -bottom-1 animate-pulse"></div>
                             
                             <div id="knight-container" class="animate-float relative">
@@ -643,11 +846,11 @@
                                      onerror="fallbackImage(this, 'knight')">
                                 <div id="battle-knight-img-svg" class="hidden"></div>
                             </div>
-                            <span id="player-title" class="bg-blue-600/90 text-white px-3.5 py-1 rounded-full text-sm font-bold border border-blue-400 shadow-lg tracking-wider">물방울 기사</span>
+                            <span id="player-title" class="racer__label text-white px-3 py-1 text-sm font-bold tracking-wider">물방울 기사</span>
                         </div>
 
                         <!-- Fire Monster (Also races towards the right spring) -->
-                        <div id="dynamic-monster-wrapper" class="absolute bottom-20 -translate-x-1/2 transition-all duration-1000 z-20 flex flex-col items-center space-y-1" style="left: 10%;">
+                        <div id="dynamic-monster-wrapper" class="racer racer--monster absolute transition-all duration-1000 z-20 flex flex-col items-center space-y-1" style="left: var(--track-start);">
                             <div class="w-20 h-6 bg-red-600/30 rounded-full blur-md absolute -bottom-1 animate-pulse"></div>
                             
                             <div id="monster-container" class="animate-monster-run">
@@ -657,36 +860,37 @@
                                      onerror="fallbackImage(this, 'monster')">
                                 <div id="battle-monster-img-svg" class="hidden"></div>
                             </div>
-                            <span class="bg-red-600/95 text-white px-3.5 py-1 rounded-full text-sm font-bold border border-red-400/50 shadow-lg tracking-wider">불의 군단</span>
+                            <span class="racer__label text-white px-3 py-1 text-sm font-bold tracking-wider">불의 군단</span>
                         </div>
 
                     </div>
 
                     <!-- Shared race coordinate axis: actors and timer use these same endpoints. -->
-                    <div class="absolute bottom-2 left-[10%] right-[18%] z-20 h-9 text-xs font-bold select-none">
-                        <div class="race-axis absolute left-0 right-0 top-3 h-3 border-t-2 border-b border-amber-400/80"></div>
-                        <span class="absolute left-0 top-0 -translate-x-1/2 rounded bg-emerald-950/90 px-2 py-0.5 text-emerald-300">출발</span>
-                        <span class="absolute right-0 top-0 translate-x-1/2 rounded bg-cyan-950/90 px-2 py-0.5 text-cyan-300">샘물</span>
+                    <div class="race-scale select-none" aria-hidden="true">
+                        <div class="race-axis race-scale__line"></div>
+                        <span class="race-scale__label race-scale__label--start">출발</span>
+                        <span class="race-scale__label race-scale__label--end">샘물</span>
+                    </div>
                     </div>
 
                     <!-- Real-Time Time Progress Bar inside the field with solved questions count -->
-                    <div class="relative h-20 bg-stone-950/95 border-t border-emerald-800/40 z-10">
-                        <div class="absolute left-[10%] right-[18%] top-3">
-                            <div class="mb-1 flex items-end justify-between text-white">
-                                <span class="text-sm font-bold text-emerald-300">출발</span>
-                                <span class="flex items-center gap-2 text-cyan-300 font-bold">⏳ 남은 시간 <b id="battle-timer-text" class="text-2xl tracking-wider text-amber-300">03:00</b></span>
-                                <span class="text-sm font-bold text-cyan-300">샘물 도착</span>
-                            </div>
-                            <div class="h-5 rounded-full overflow-hidden border border-emerald-700 bg-stone-900 shadow-inner">
-                                <div id="bar-timer" class="h-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-600 rounded-full transition-all duration-1000" style="width: 100%"></div>
-                            </div>
-                            <div class="mt-1 text-center text-sm font-bold text-stone-300">예상 해결 <span id="solved-questions-indicator" class="text-cyan-300 text-lg">0</span> / <span id="solved-total-questions">4</span>개</div>
+                    <div class="battle-progress">
+                        <div class="battle-progress__time">
+                            <small>⏳ 남은 시간</small>
+                            <strong id="battle-timer-text">03:00</strong>
+                        </div>
+                        <div class="battle-progress__bar" role="progressbar" aria-label="남은 시간" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+                            <div id="bar-timer" class="battle-progress__fill" style="width: 100%"></div>
+                        </div>
+                        <div class="battle-progress__solved">
+                            <small>예상 해결</small>
+                            <strong><span id="solved-questions-indicator">0</span> / <span id="solved-total-questions">4</span>개</strong>
                         </div>
                     </div>
                 </div>
 
                 <!-- Bottom Action Panel ( z-index secured ) -->
-                <div class="grid grid-cols-4 gap-4 shrink-0 relative z-30">
+                <div class="battle-actions relative z-30">
                     <!-- Abandon Button -->
                     <button onclick="abortAdventure()" class="ui-button ui-button--secondary col-span-1 py-4 text-2xl flex items-center justify-center space-x-2">
                         <span>🏃 포기하고 홈으로</span>
@@ -1344,7 +1548,7 @@
                 if (setupGlow) setupGlow.classList.remove('hidden');
                 if (playerTitle) {
                     playerTitle.textContent = "⚡ 전설의 물방울 기사";
-                    playerTitle.className = "bg-gradient-to-r from-cyan-600 to-sky-400 text-white px-3.5 py-1 rounded-full text-sm font-bold border border-cyan-300 animate-pulse shadow-lg shadow-cyan-500/20";
+                    playerTitle.className = "racer__label text-white px-3 py-1 text-sm font-bold tracking-wider animate-pulse";
                 }
                 if (setupBadge) {
                     setupBadge.textContent = "⚡ 전설의 물방울 기사 (연속 승리 중!)";
@@ -1356,7 +1560,7 @@
                 const lvlText = state.winStreak > 0 ? `🌊 물방울 기사 (Lvl.${state.winStreak + 1})` : "💧 아기 물방울 기사";
                 if (playerTitle) {
                     playerTitle.textContent = lvlText;
-                    playerTitle.className = "bg-blue-500/90 text-white px-3.5 py-1 rounded-full text-sm font-bold border border-blue-400 shadow-lg";
+                    playerTitle.className = "racer__label text-white px-3 py-1 text-sm font-bold tracking-wider";
                 }
                 if (setupBadge) {
                     setupBadge.textContent = `💧 출격 준비 중인 ${lvlText}`;
@@ -1377,14 +1581,14 @@
             if (state.currentTimeRemaining <= 15 || percentRemaining < 20) {
                 soundTick();
                 if (threatInd) {
-                    threatInd.textContent = "🚨 위험해요! 불의 군단이 샘물 근처를 잠식 중입니다!";
-                    threatInd.className = "text-red-400 font-extrabold animate-bounce text-xl bg-red-950/80 px-3 py-1 rounded-full border border-red-500/30 shadow-md";
+                    threatInd.textContent = "위험! 불의 군단이 샘물에 가까워졌어요";
+                    threatInd.className = "battle-status__item battle-status__item--center is-danger";
                 }
                 if (knightCont) knightCont.classList.add('animate-shake');
             } else {
                 if (threatInd) {
-                    threatInd.textContent = "🌳 두 영웅이 숲속의 샘물을 향해 질주하고 있습니다!";
-                    threatInd.className = "text-amber-300 font-bold animate-pulse text-xl";
+                    threatInd.textContent = "두 영웅이 생명의 샘을 향해 달리고 있어요";
+                    threatInd.className = "battle-status__item battle-status__item--center";
                 }
                 if (knightCont) knightCont.classList.remove('animate-shake');
             }
@@ -1420,7 +1624,11 @@
             // Progress ratios
             const percent = (state.currentTimeRemaining / state.totalTimer) * 100;
             const barTimer = document.getElementById('bar-timer');
-            if (barTimer) barTimer.style.width = `${percent}%`;
+            if (barTimer) {
+                barTimer.style.width = `${percent}%`;
+                const progressBar = barTimer.parentElement;
+                if (progressBar) progressBar.setAttribute('aria-valuenow', Math.round(percent));
+            }
 
             // Encroaching Fire Overlay
             const firePercent = 100 - percent;
@@ -1432,11 +1640,14 @@
             // SIMULTANEOUS RACING MOVEMENT FORMULA (Now racing Left to Right):
             // Goal (Spring of Life) is placed on the Right side of the screen (~85%).
             // Time ratio spent: progress ranges from 0 (at start) to 1 (when timer finishes).
-            // Both racers use the exact same 10%-82% axis drawn in the arena.
+            // Read the shared CSS endpoints so actors, axis, goal and timer layout
+            // cannot drift onto different coordinate systems.
             const progress = 1 - (state.currentTimeRemaining / state.totalTimer); // starts at 0, goes to 1
 
-            const trackStart = 10;
-            const trackEnd = 82;
+            const raceTrack = document.querySelector('.race-track');
+            const raceStyles = raceTrack ? getComputedStyle(raceTrack) : null;
+            const trackStart = parseFloat(raceStyles?.getPropertyValue('--track-start')) || 12;
+            const trackEnd = parseFloat(raceStyles?.getPropertyValue('--track-end')) || 86;
             const trackLength = trackEnd - trackStart;
             const knightLeft = trackStart + (trackLength * 0.9 * progress);
             const monsterLeft = trackStart + (trackLength * progress);
