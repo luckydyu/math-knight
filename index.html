@@ -137,6 +137,23 @@
 
         .today-completed strong { color: var(--color-water-400); }
 
+        .progress-reset {
+            padding: .15rem .4rem;
+            border: 1px solid rgba(248,113,113,.28);
+            border-radius: .45rem;
+            color: #fca5a5;
+            font-size: .65rem;
+            font-weight: 700;
+            opacity: .72;
+            transition: opacity .2s ease, background-color .2s ease;
+        }
+
+        .progress-reset:hover,
+        .progress-reset:focus-visible {
+            background: rgba(127,29,29,.28);
+            opacity: 1;
+        }
+
         .screen-shell {
             padding: var(--space-3) !important;
             gap: var(--space-3) !important;
@@ -714,6 +731,31 @@
             transition-timing-function: linear !important;
         }
 
+        .racer--knight.is-spring-dashing {
+            transition-duration: .65s !important;
+            transition-timing-function: cubic-bezier(.2,.85,.3,1) !important;
+        }
+
+        .racer--knight.is-spring-dashing .racer__label,
+        .racer--knight.is-drinking .racer__label { opacity: 0; }
+
+        .racer--knight.is-drinking #knight-container {
+            animation: spring-drink .7s ease-in-out 2 !important;
+        }
+
+        .racer--knight.is-drinking #knight-container::after {
+            content: '💧';
+            position: absolute;
+            right: -.25rem;
+            top: 48%;
+            font-size: 1.15rem;
+            animation: drink-drop .7s ease-in-out 2;
+        }
+
+        .race-goal.is-being-drunk #battle-spring-img {
+            animation: spring-drain .7s ease-in-out 2 !important;
+        }
+
         .racer--knight { bottom: 2.25rem !important; }
         .racer--monster { bottom: 6rem !important; }
 
@@ -746,6 +788,39 @@
 
         .race-scale__label--start { left: 0; transform: translateX(-50%); color: #6ee7b7; }
         .race-scale__label--end { right: 0; transform: translateX(50%); color: var(--color-water-400); }
+
+        .race-question-marks {
+            position: absolute;
+            inset: 0;
+        }
+
+        .race-question-mark {
+            position: absolute;
+            top: .55rem;
+            width: 1px;
+            height: .75rem;
+            background: rgba(246,196,83,.9);
+            transform: translateX(-50%);
+        }
+
+        .race-question-mark__label {
+            position: absolute;
+            left: 50%;
+            top: .65rem;
+            padding: .05rem .22rem;
+            border-radius: .25rem;
+            background: rgba(7,28,24,.88);
+            color: #fde68a;
+            font-size: .62rem;
+            font-weight: 800;
+            line-height: 1;
+            white-space: nowrap;
+            transform: translateX(-50%);
+        }
+
+        .race-question-mark:last-child .race-question-mark__label {
+            transform: translateX(-100%);
+        }
 
         .battle-progress {
             position: relative;
@@ -831,6 +906,7 @@
             .header-summary { min-width: 14rem; gap: .2rem; }
             .reward-badge-image { width: 2rem; height: 2rem; }
             .today-completed { padding: .15rem .5rem; font-size: .65rem; }
+            .progress-reset { padding: .1rem .3rem; font-size: .55rem; }
 
             .screen-shell { padding: .5rem !important; gap: .5rem !important; }
             .ui-panel { border-radius: 1rem !important; }
@@ -888,6 +964,8 @@
             .race-scale { bottom: .1rem; height: 1.2rem; }
             .race-scale__line { top: .45rem; height: .45rem; }
             .race-scale__label { font-size: .52rem; }
+            .race-question-mark { top: .3rem; height: .55rem; }
+            .race-question-mark__label { top: .45rem; font-size: .45rem; }
             .battle-actions { grid-template-columns: minmax(7rem, 1fr) minmax(0, 3fr); min-height: 3.25rem; gap: .5rem !important; }
             .battle-actions .ui-button { padding: .35rem !important; font-size: 1rem !important; }
             #btn-attack { font-size: 1.1rem !important; }
@@ -979,6 +1057,20 @@
             55% { box-shadow: inset 0 0 36px rgba(34,211,238,.16); }
             100% { box-shadow: inset 0 0 0 rgba(34,211,238,0); }
         }
+        @keyframes spring-drink {
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            35% { transform: translate(9px, 4px) rotate(9deg) scale(.94); }
+            65% { transform: translate(5px, 1px) rotate(5deg) scale(.98); }
+        }
+        @keyframes drink-drop {
+            0%, 100% { opacity: 0; transform: translate(8px,-8px) scale(.65); }
+            45% { opacity: 1; transform: translate(0,0) scale(1); }
+            75% { opacity: 0; transform: translate(-7px,5px) scale(.7); }
+        }
+        @keyframes spring-drain {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(.9); filter: brightness(1.55) saturate(1.2); }
+        }
         .animate-float {
             animation: float 2.5s ease-in-out infinite;
         }
@@ -1060,6 +1152,7 @@
                 animation-iteration-count: 1 !important;
                 transition-duration: .01ms !important;
             }
+            .racer { transition-duration: .01ms !important; }
             .ui-button--primary::after { display: none; }
         }
     </style>
@@ -1099,9 +1192,10 @@
                         <span class="text-stone-400 text-sm">없음</span>
                     </div>
                 </div>
-                <div class="today-completed" role="status" aria-live="polite" aria-atomic="true">
+                <div class="today-completed">
                     <span>오늘 완료한 페이지</span>
-                    <strong id="today-completed-pages">아직 없음</strong>
+                    <strong id="today-completed-pages" role="status" aria-live="polite" aria-atomic="true">아직 없음</strong>
+                    <button type="button" class="progress-reset" onclick="resetProgress()" aria-label="구한 샘물과 완료 페이지 진행 상황 초기화">초기화</button>
                 </div>
             </div>
         </header>
@@ -1324,6 +1418,7 @@
                     <!-- Shared race coordinate axis: actors and timer use these same endpoints. -->
                     <div class="race-scale select-none" aria-hidden="true">
                         <div class="race-axis race-scale__line"></div>
+                        <div id="race-question-marks" class="race-question-marks"></div>
                         <span class="race-scale__label race-scale__label--start">출발</span>
                         <span class="race-scale__label race-scale__label--end">샘물</span>
                     </div>
@@ -1582,6 +1677,37 @@
             appLog("설정값이 로컬스토리지에 무사히 영구 보관되었습니다.", "success");
         }
 
+        function resetProgress() {
+            soundClick();
+            const shouldReset = window.confirm('구한 샘물, 오늘 완료한 페이지와 현재 학습 페이지를 모두 초기화할까요?');
+            if (!shouldReset) return;
+
+            if (state.timerInterval) {
+                clearInterval(state.timerInterval);
+                state.timerInterval = null;
+            }
+
+            state.currentPage = 24;
+            state.springCount = 0;
+            state.completedDate = getLocalDateKey();
+            state.completedPages = [];
+            state.winStreak = 0;
+            state.lastResult = null;
+
+            localStorage.removeItem('water_knight_springs_landscape_v3');
+            localStorage.removeItem('water_knight_page_landscape_v3');
+            localStorage.removeItem('water_knight_completed_pages_v1');
+
+            const pageInput = document.getElementById('input-page');
+            if (pageInput) pageInput.value = state.currentPage;
+            updateDashboardUI();
+            updateResultSpringShowcase();
+            updateKnightVisuals();
+            saveStats();
+            showScreen('screen-setup');
+            appLog('학습 진행 상황을 초기화했습니다.', 'success');
+        }
+
         // Audio synthesis helpers
         function playTone(freq, type, duration, vol = 0.2) {
             try {
@@ -1644,6 +1770,7 @@
                 state.questionsCount = Math.max(1, state.questionsCount + amount);
                 const questInput = document.getElementById('input-questions');
                 if (questInput) questInput.value = state.questionsCount;
+                renderQuestionScale();
                 appLog(`문제 수 변경됨: ${state.questionsCount}개`, "info");
             } else if (type === 'time') {
                 state.timePerQuestion = Math.max(10, state.timePerQuestion + amount);
@@ -1658,6 +1785,24 @@
             const timeDisplay = document.getElementById('display-time');
             if (timeDisplay) {
                 timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        function renderQuestionScale() {
+            const marks = document.getElementById('race-question-marks');
+            if (!marks) return;
+            marks.innerHTML = '';
+
+            for (let question = 1; question <= state.questionsCount; question++) {
+                const mark = document.createElement('span');
+                mark.className = 'race-question-mark';
+                mark.style.left = `${(question / state.questionsCount) * 100}%`;
+
+                const label = document.createElement('span');
+                label.className = 'race-question-mark__label';
+                label.textContent = `${question}개`;
+                mark.appendChild(label);
+                marks.appendChild(mark);
             }
         }
 
@@ -1737,6 +1882,7 @@
             if (solvedTotal) solvedTotal.textContent = state.questionsCount;
 
             updateKnightVisuals();
+            renderQuestionScale();
 
             // Screen shift
             showScreen('screen-battle');
@@ -1885,70 +2031,60 @@
             }
 
             const knightWrapper = document.getElementById('dynamic-knight-wrapper');
-            const monsterWrapper = document.getElementById('dynamic-monster-wrapper');
             const monsterContainer = document.getElementById('monster-container');
+            const springGoal = document.getElementById('spring-shrine-wrapper');
+            const threatIndicator = document.getElementById('threat-indicator');
             const impactSlash = document.getElementById('impact-slash');
             const impactFlash = document.getElementById('impact-flash');
             const reducedMotion = prefersReducedMotion();
-            const impactDelay = reducedMotion ? 0 : 200;
-            const finishDelay = reducedMotion ? 120 : 600;
+            const wait = duration => new Promise(resolve => setTimeout(resolve, duration));
+            const customSlash = await getAsset('slash');
 
-            // CRITICAL UPGRADE: 물방울 기사 돌진 & 몬스터 직접 베기 애니메이션 구현
-            if (knightWrapper && monsterWrapper) {
-                // 원본 위치 저장
-                const originalLeft = knightWrapper.style.left;
-                const monsterLeft = monsterWrapper.style.left;
-                
-                // 1. 기사가 몬스터 위치로 비호같이 쾌속 돌진 (0.2s)
-                knightWrapper.style.transition = 'left 0.2s cubic-bezier(0.25, 1, 0.5, 1)';
-                knightWrapper.style.left = monsterLeft;
+            if (impactSlash) {
+                impactSlash.style.backgroundImage = `url('${customSlash || BUNDLED_ASSETS.slash}')`;
+                impactSlash.style.backgroundSize = 'contain';
+                impactSlash.style.backgroundRepeat = 'no-repeat';
+                impactSlash.style.backgroundPosition = 'center';
+                impactSlash.style.mixBlendMode = 'screen';
+                impactSlash.classList.add('active');
+            }
+            impactFlash?.classList.add('active');
+            monsterContainer?.classList.add('animate-shake');
 
-                // Load custom slash asset if saved
-                const customSlash = await getAsset('slash');
+            if (reducedMotion) {
+                if (knightWrapper) knightWrapper.style.left = 'calc(var(--track-end) - 7%)';
+                await wait(120);
+            } else {
+                await wait(260);
+                impactSlash?.classList.remove('active');
+                impactFlash?.classList.remove('active');
+                monsterContainer?.classList.remove('animate-shake');
 
-                setTimeout(() => {
-                    // 2. 격돌 시점: 거대한 크레센트 검기 이펙트 발현 (CORS 회피용 mix-blend-mode 스크린 적용)
-                    if (impactSlash) {
-                        if (customSlash) {
-                            impactSlash.style.backgroundImage = `url('${customSlash}')`;
-                        } else {
-                            // Default fallback
-                            impactSlash.style.backgroundImage = `url('${BUNDLED_ASSETS.slash}')`;
-                        }
-                        impactSlash.style.backgroundSize = 'contain';
-                        impactSlash.style.backgroundRepeat = 'no-repeat';
-                        impactSlash.style.backgroundPosition = 'center';
-                        impactSlash.style.mixBlendMode = 'screen'; // 검은 배경 완벽 필터링
-                        impactSlash.classList.add('active');
-                    }
-                    if (impactFlash) {
-                        impactFlash.classList.add('active');
-                    }
+                if (threatIndicator) {
+                    threatIndicator.textContent = '물방울 기사가 생명의 샘을 향해 달려갑니다!';
+                    threatIndicator.className = 'battle-status__item battle-status__item--center';
+                }
+                if (knightWrapper) {
+                    knightWrapper.classList.add('is-spring-dashing');
+                    knightWrapper.style.left = 'calc(var(--track-end) - 7%)';
+                }
 
-                    // 3. 몬스터 피격 효과 (몬스터 흔들림 및 넉백)
-                    if (monsterContainer) {
-                        monsterContainer.classList.add('animate-shake');
-                    }
+                await wait(700);
+                knightWrapper?.classList.remove('is-spring-dashing');
+                knightWrapper?.classList.add('is-drinking');
+                springGoal?.classList.add('is-being-drunk');
+                if (threatIndicator) threatIndicator.textContent = '물방울 기사가 생명의 샘물을 마시고 있어요!';
 
-                    // 4. 돌진 후 기사 원위치 복귀 (0.3s)
-                    setTimeout(() => {
-                        knightWrapper.style.left = originalLeft;
-                    }, reducedMotion ? 0 : 150);
-
-                }, impactDelay);
+                await wait(1050);
             }
 
-            appLog("물방울 검 돌진 참격이 가동되었습니다!", "info");
-            setTimeout(() => {
-                // 원위치 정비 및 화면 복구
-                if (impactSlash) impactSlash.classList.remove('active');
-                if (impactFlash) impactFlash.classList.remove('active');
-                if (monsterContainer) monsterContainer.classList.remove('animate-shake');
-                if (knightWrapper) {
-                    knightWrapper.style.transition = 'all 1s ease-in-out'; // 원래 트랜지션 복귀
-                }
-                finishAdventure(true);
-            }, finishDelay);
+            impactSlash?.classList.remove('active');
+            impactFlash?.classList.remove('active');
+            monsterContainer?.classList.remove('animate-shake');
+            knightWrapper?.classList.remove('is-spring-dashing', 'is-drinking');
+            springGoal?.classList.remove('is-being-drunk');
+            appLog('물방울 검 공격 후 생명의 샘물 흡수 연출을 완료했습니다.', 'info');
+            finishAdventure(true);
         }
 
         // Pure Canvas 4x4 Sprite Sheet Sequential Keyframe Player
@@ -2222,6 +2358,7 @@
             // registration or storage permission is required.
             loadStats();
             formatTimeDisplay();
+            renderQuestionScale();
             initLeafRain();
 
             applyBundledAssets();
